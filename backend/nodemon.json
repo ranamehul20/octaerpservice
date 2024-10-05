@@ -1,0 +1,5 @@
+{
+    "ext": "js,json",    
+    "ignore": ["public/*"], 
+    "exec": "node --experimental-modules server.js"
+}
