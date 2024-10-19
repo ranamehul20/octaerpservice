@@ -2,7 +2,7 @@ import { Schema, model,ObjectId,Date } from "mongoose";
 
 const BlockMstSchema = new Schema({
     name: { type: String, required: true, trim: true },
-    totalHouse: { type: Number, required: true, trim: true },
+    totalHouse: { type: Number, required: false, default:1, trim: true },
     societyId: { type: ObjectId, ref: 'SocietyMst', required:true},
     createdBy: {type:ObjectId,ref: 'User', required:false},
     updatedBy: {type:ObjectId,ref: 'User', required:false}

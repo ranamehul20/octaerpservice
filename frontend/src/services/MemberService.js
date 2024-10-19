@@ -2,39 +2,36 @@ import axios from "axios";
 const apiUrl = import.meta.env.VITE_REACT_APP_API_URL;
 export const listRequest = async () => {
   try {
-    const response = await axios.get("http://localhost:3001/api/blocks", {
+    const response = await axios.get(`${apiUrl}/members`, {
       withCredentials: true, // Important to include cookies in the request
     });
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
 export const createRequest = async (formData) => {
   try {
     const response = await await axios.post(
-      "http://localhost:3001/api/societies",
+      `${apiUrl}/auth/register`,
       formData,
       {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
         withCredentials: true,
       }
     );
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
 export const updateRequest = async (formData) => {
   try {
     const response = await await axios.post(
-      `http://localhost:3001/api/blocks/${id}`,
+      `${apiUrl}/members/${id}`,
       formData,
       {
         withCredentials: true,
@@ -43,38 +40,50 @@ export const updateRequest = async (formData) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
 export const deleteRequest = async () => {
   try {
-    const response = await axios.get("http://localhost:3001/api/societies", {
+    const response = await axios.get(`${apiUrl}/members`, {
       withCredentials: true, // Important to include cookies in the request
     });
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
 export const viewRequest = async (id) => {
   try {
-    const response = await axios.get(`http://localhost:3001/api/blocks/${id}`, {
+    const response = await axios.get(`${apiUrl}/members/${id}`, {
         withCredentials: true, // Important to include cookies in the request
     });
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
+  }
+};
+
+export const getBlockRequest = async (id) => {
+  try {
+    const response = await axios.get(`${apiUrl}/blocks?societyId=${id}`, {
+      withCredentials: true, // Important to include cookies in the request
+    });
+    console.log("Success", response);
+    return response.data;
+  } catch (err) {
+    throw err;
   }
 };
 
 export const getSocietyRequest = async (id) => {
   try {
     const response = await axios.get(
-      "http://localhost:3001/api/config/societies",
+      `${apiUrl}/config/societies`,
       {
         withCredentials: true, // Important to include cookies in the request
       }
@@ -82,6 +91,18 @@ export const getSocietyRequest = async (id) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
+  }
+};
+
+export const getHouseRequest = async (id) => {
+  try {
+    const response = await axios.get(`${apiUrl}/houses?blockId=${id}`, {
+      withCredentials: true, // Important to include cookies in the request
+    });
+    console.log("Success", response);
+    return response.data;
+  } catch (err) {
+    throw err;
   }
 };

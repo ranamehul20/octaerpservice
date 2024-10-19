@@ -26,13 +26,13 @@ const _nav = [
     component: CNavItem,
     name: 'Society',
     to: '/society',
-    icon: <i class="bi bi-building nav-icon"></i>,
+    icon: <i className="bi bi-building nav-icon"></i>,
   },
   {
     component: CNavItem,
     name: 'Block',
     to: '/block',
-    icon: <i class="bi bi-square-fill nav-icon"></i>,
+    icon: <i className="bi bi-square-fill nav-icon"></i>,
   },
   {
     component: CNavItem,
@@ -43,8 +43,8 @@ const _nav = [
   {
     component: CNavItem,
     name: 'Member',
-    to: '/member',
-    icon: <i class="bi bi-people nav-icon"></i>,
+    to: '/members',
+    icon: <i className="bi bi-people nav-icon"></i>,
   }
 ]
 

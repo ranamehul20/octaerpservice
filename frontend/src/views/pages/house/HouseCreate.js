@@ -13,6 +13,7 @@ import {
   CFormSelect
 } from '@coreui/react'
 import axios from 'axios'
+import { createRequest,getSocietyRequest,getBlockRequest } from '../../../services/HouseService'
 
 const HouseCreate = () => {
   const [formData, setFormData] = useState({
@@ -30,18 +31,17 @@ const HouseCreate = () => {
   const [selectedSociety, setSelectedSociety] = useState('');
   const [blocks, setBlocks] = useState([]);
   const [selectedBlock, setSelectedBlock] = useState('');
+  const [isDisabled, setIsDisabled] = useState(false);
   
  // Fetch societies on component mount
  useEffect(() => {
   const fetchSocieties = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/api/config/societies", {
-        withCredentials: true, // Important to include cookies in the request
-      });
-      if (response.data.code === 200 &&!response.data.error) {
-        setSocieties(response.data.results);
+      const response = await getSocietyRequest();
+      if (response.code === 200 &&!response.error) {
+        setSocieties(response.results);
       } else {
-        console.error('Error fetching societies:', response.data.error);
+        console.error('Error fetching societies:', response.error);
       }
     } catch (error) {
       console.error('Error fetching societies:', error);
@@ -56,13 +56,11 @@ useEffect(() => {
   const fetchBlocks = async () => {
     if(selectedSociety){
     try {
-      const response = await axios.get("http://localhost:3001/api/blocks?societyId="+selectedSociety, {
-        withCredentials: true, // Important to include cookies in the request
-      });
-      if (response.data.code === 200 &&!response.data.error) {
-        setBlocks(response.data.results);
+      const response = await getBlockRequest(selectedSociety);
+      if (response.code === 200 &&!response.error) {
+        setBlocks(response.results);
       } else {
-        console.error('Error fetching blocks:', response.data.error);
+        console.error('Error fetching blocks:', response.error);
       }
     } catch (error) {
       console.error('Error fetching blocks:', error);
@@ -88,12 +86,11 @@ useEffect(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsDisabled(true)
     setError(null)
     setSuccess(false)
     try {
-      await axios.post('http://localhost:3001/api/houses', formData,{
-        withCredentials: true
-    })
+      await createRequest(formData);
       setSuccess(true)
       setFormData({ name: '',
         type: '',
@@ -102,8 +99,10 @@ useEffect(() => {
         totalAdults: 0,
         blockId: '',
         societyId: ''})
+        setIsDisabled(false)
     } catch (err) {
-      setError('Failed to create house. Please try again.')
+      setError(err.response.data.errors)
+      setIsDisabled(false)
     }
   }
 
@@ -117,7 +116,7 @@ useEffect(() => {
           <CCardBody>
             <CForm onSubmit={handleSubmit}>
             <CRow className="mb-3">
-                <CFormLabel htmlFor="societyId" className="col-sm-2 col-form-label">Society</CFormLabel>
+                <CFormLabel htmlFor="societyId" className="col-sm-2 col-form-label">Society <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                 <CFormSelect
                   id="societyId"
@@ -134,7 +133,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="blockId" className="col-sm-2 col-form-label">Block</CFormLabel>
+                <CFormLabel htmlFor="blockId" className="col-sm-2 col-form-label">Block <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                 <CFormSelect
                   id="blockId"
@@ -153,7 +152,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">House Number</CFormLabel>
+                <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">House Number <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
                     type="text"
@@ -167,7 +166,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="totalMembers" className="col-sm-2 col-form-label">Type</CFormLabel>
+                <CFormLabel htmlFor="totalMembers" className="col-sm-2 col-form-label">Type <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
                     type="text"
@@ -190,7 +189,7 @@ useEffect(() => {
                     value={formData.totalMembers}
                     placeholder="Total Members"
                     onChange={handleChange}
-                    required
+                    
                   />
                 </CCol>
               </CRow>
@@ -204,7 +203,7 @@ useEffect(() => {
                     value={formData.totalChildren}
                     placeholder="Total Children"
                     onChange={handleChange}
-                    required
+                  
                   />
                 </CCol>
               </CRow>
@@ -218,11 +217,10 @@ useEffect(() => {
                     value={formData.totalAdults}
                     placeholder="Total Adults"
                     onChange={handleChange}
-                    required
                   />
                 </CCol>
               </CRow>
-              <CButton type="submit" color="primary">Submit</CButton>
+              <CButton type="submit" color="primary" disabled={isDisabled}>Submit</CButton>
             </CForm>
             {error && <CAlert color="danger" className="mt-3">{error}</CAlert>}
             {success && <CAlert color="success" className="mt-3">Block created successfully!</CAlert>}

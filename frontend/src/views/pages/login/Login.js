@@ -35,11 +35,11 @@ const Login = () => {
   };
   const { isAuthenticated } = useAuth();
   useEffect(() => {
-    console.log("login");
+    console.log("login",isAuthenticated);
     if (isAuthenticated) {
       navigate('/dashboard');
     }
-  },[]);
+  },[isAuthenticated]);
   
   // API call to login
   const handleLogin = async (e) => {

@@ -14,7 +14,7 @@ export const loginService = async (email, password) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -27,7 +27,7 @@ export const logoutService = async (req, res, next) => {
     );
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -37,6 +37,6 @@ export const checkAuthentication = async (req, res) => {
     console.log(response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };

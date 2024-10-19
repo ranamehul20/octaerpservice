@@ -1,5 +1,5 @@
 import { BlockMst } from "../models/BlockMst.js";
-import { blockValidator } from "../utils/auth.js";
+import { blockValidator } from "../utils/validator.js";
 import { success, errors, validation } from "../utils/common.js";
 import Schema from "mongoose";
 

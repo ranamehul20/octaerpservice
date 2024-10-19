@@ -1,5 +1,5 @@
 import express from "express";
-import {verifyToken} from "../utils/auth.js";
+import {verifyToken} from "../utils/validator.js";
 import { createHouse, listingHouses,houseDetails,updateHouses } from "../controllers/HouseMstController.js";
 const router = express.Router();
 

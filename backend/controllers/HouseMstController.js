@@ -1,5 +1,5 @@
 import { HouseMst } from "../models/HouseMst.js";
-import { houseValidator } from "../utils/auth.js";
+import { houseValidator } from "../utils/validator.js";
 import { success, errors, validation } from "../utils/common.js";
 import Schema from "mongoose";
 

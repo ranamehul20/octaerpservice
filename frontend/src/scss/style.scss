@@ -13,3 +13,12 @@
 
 // If you want to add custom CSS you can put it here
 @import "custom";
+
+// Optional: Define a variable for the red color to reuse later
+$required-color: red;
+
+.required-asterisk {
+  color: $required-color;
+  margin-left: 4px;
+}
+

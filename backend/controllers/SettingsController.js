@@ -10,9 +10,16 @@ export const listingCountries  = async (req, res, next) => {
     const country = await Countries.find();
     if (country) {
       // await session.commitTransaction();
+      const countryList = [];
+      country.forEach((item) => {
+        countryList.push({
+          id: item.id,
+          name: item.name
+        });
+      });
       res
         .status(200)
-        .json(success("Country fetched successfully",country, res.statusCode));
+        .json(success("Country fetched successfully",countryList, res.statusCode));
       return next();
     }
     res
@@ -35,9 +42,16 @@ export const listingStates  = async (req, res, next) => {
       const state = await States.find({country_id: req.query.country});
       if (state) {
         // await session.commitTransaction();
+      const stateList = [];
+      state.forEach((item) => {
+        stateList.push({
+          id: item.id,
+          name: item.name
+        });
+      });
         res
           .status(200)
-          .json(success("state fetched successfully",state, res.statusCode));
+          .json(success("state fetched successfully",stateList, res.statusCode));
         return next();
       }
       res
@@ -59,9 +73,16 @@ export const listingCities  = async (req, res, next) => {
       const city = await Cities.find({state_id: req.query.state});
       if (city) {
         // await session.commitTransaction();
+        const cityList = [];
+      city.forEach((item) => {
+        cityList.push({
+          id: item.id,
+          name: item.name
+        });
+      });
         res
           .status(200)
-          .json(success("city fetched successfully",city, res.statusCode));
+          .json(success("city fetched successfully",cityList, res.statusCode));
         return next();
       }
       res
@@ -77,15 +98,36 @@ export const listingCities  = async (req, res, next) => {
     }
   };
 
-export const listingSociety = (req, res) => {
+export const listingSociety = async (req, res) => {
   try { 
-    SocietyMst.find()
-     .then((society) => {
-        if (!society) {
-          return res.status(404).json(errors("Society not found",res.statusCode));
-        }
-        res.status(200).json(success("Society Fetched Successfully",society,res.statusCode));
-      })
-     .catch((err) => res.status(500).json(errors(err.message, res.statusCode)));
+   const societies = await SocietyMst.find();
+   if(societies) {
+    const societyListing = [];
+    societies.forEach((item) => {
+      societyListing.push({
+        _id: item._id,
+        name: item.name
+      });
+    });
+    res.status(200).json(success("Society Fetched Successfully",societyListing,res.statusCode));
+   }else {
+    res.status(500).json(errors("No Society Found",res.statusCode));
+   }
   } catch (error) { res.status(500).json(errors(error.message,res.statusCode)); }
+};
+
+export const staticValues = (req, res) => {
+  try {
+    const societyTypes = {
+      "1": "Tenament",
+      "2" : "Flat"
+    };
+    const userTypes = { 
+      // "1" : "Admin",
+      "2" : "Chairman",
+      "3" : "House Owner",
+      "4" : "Tenant"
+    };
+    res.status(200).json(success("Static Values Fetched Successfully",{"societyTypes":societyTypes,"userTypes":userTypes},res.statusCode));
+  } catch (err) { res.status(500).json(errors(err.message, res.statusCode)); }
 };

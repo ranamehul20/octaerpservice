@@ -1,5 +1,5 @@
 import express from "express";
-import {verifyToken} from "../utils/auth.js";
+import {verifyToken} from "../utils/validator.js";
 import { createSociety, listingSociety,updateSociety,SocietyDetail } from "../controllers/SocietyMstController.js";
 import multer from 'multer';
 import path from 'path';

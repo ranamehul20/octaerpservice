@@ -1,10 +1,21 @@
 import { SocietyMst } from "../models/SocietyMst.js";
 import { success, errors, validation } from "../utils/common.js";
+import { societyValidator } from "../utils/validator.js";
 // Society Create Method
 export const createSociety = async (req, res, next) => {
   const data = req.body;
   console.log(req.user._id);
-  console.log("path", req.file.path);
+  if(req.file){
+    console.log("path", req.file.path);
+  }
+  const validator = await societyValidator(data);
+  console.log(validator);
+    if (!validator.isValid) {
+      res
+        .status(422)
+        .json(validation(Object.values(validator.error).join(",")));
+      return next();
+    }
   try {
     const society = new SocietyMst({
       name: data.name,
@@ -17,7 +28,7 @@ export const createSociety = async (req, res, next) => {
       type: data.type ?? 1,
       createdBy: req.user._id,
       settings: {
-        logo: req.file.path ?? "",
+        logo: (req.file && req.file.path) ?? "",
         currency: data.currency ?? "",
         registrationNumber: data.registrationNumber ?? "",
         bankDetails: data.bankDetails ?? "",

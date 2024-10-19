@@ -27,6 +27,7 @@ const BlockUpdate = () => {
   const [success, setSuccess] = useState(false);
   const [societies, setSocieties] = useState([]);
   const [selectedSociety, setSelectedSociety] = useState('');
+  const [isDisabled, setIsDisabled] = useState(false);
 
   // Function to fetch existing society details
   const fetchBlockDetails = async () => {
@@ -79,15 +80,19 @@ const BlockUpdate = () => {
     e.preventDefault()
     setError(null)
     setSuccess(false)
+    setIsDisabled(true);
     try {
       const res = await updateRequest(id,formData);
       if(res.code === 200 && !res.error){
         setSuccess(true);
+        setIsDisabled(false);
       }else{
         setError(res.message);
+        setIsDisabled(false);
       }
     } catch (err) {
-      setError('Failed to create block. Please try again.')
+      setError(err.response.data.errors)
+      setIsDisabled(false)
     }
   }
 
@@ -101,7 +106,7 @@ const BlockUpdate = () => {
           <CCardBody>
             <CForm onSubmit={handleSubmit}>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">Block Name</CFormLabel>
+                <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">Block Name <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
                     type="text"
@@ -124,12 +129,11 @@ const BlockUpdate = () => {
                     value={formData.totalHouse}
                     placeholder="Total House"
                     onChange={handleChange}
-                    required
                   />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="societyId" className="col-sm-2 col-form-label">Society</CFormLabel>
+                <CFormLabel htmlFor="societyId" className="col-sm-2 col-form-label">Society <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                 <CFormSelect
                   id="societyId"
@@ -145,7 +149,7 @@ const BlockUpdate = () => {
                 </CFormSelect>
                 </CCol>
               </CRow>
-              <CButton type="submit" color="primary">Submit</CButton>
+              <CButton type="submit" color="primary" disabled={isDisabled}>Submit</CButton>
             </CForm>
             {error && <CAlert color="danger" className="mt-3">{error}</CAlert>}
             {success && <CAlert color="success" className="mt-3">Block created successfully!</CAlert>}

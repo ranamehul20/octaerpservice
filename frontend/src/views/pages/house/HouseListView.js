@@ -14,6 +14,7 @@ import {
 import axios from "axios";
 import DataTable from 'react-data-table-component';
 import { Modal,Button } from 'react-bootstrap';
+import { listRequest } from "../../../services/HouseService";
 
 const HouseListView = () => {
   const [houses, setHouses] = useState([]);
@@ -29,11 +30,9 @@ const HouseListView = () => {
 
   const fetchHouse = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/api/houses", {
-        withCredentials: true, // Important to include cookies in the request
-      });
-      if (response.data.code === 200 && !response.data.error) {
-        setHouses(response.data.results);
+      const response = await listRequest()
+      if (response.code === 200 && !response.error) {
+        setHouses(response.results);
       } else {
         setError("Failed to fetch house. Please try again later.");
       }

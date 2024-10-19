@@ -1,5 +1,5 @@
 import express from "express";
-import {verifyToken} from "../utils/auth.js";
+import {verifyToken} from "../utils/validator.js";
 import { createBlock,listingBlocks,getBlockDetails,updateBlocks } from "../controllers/BlockMstController.js";
 const router = express.Router();
 

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams,useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CCard, CCardBody, CCardHeader, CCol, CRow, CButton } from '@coreui/react';
+import { viewRequest } from '../../../services/HouseService';
 
 const HouseDetailsView = () => {
     const navigate = useNavigate();
@@ -13,10 +14,8 @@ const HouseDetailsView = () => {
     // Fetch society details from the backend API
     const fetchHouseDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/api/houses/${id}`,{
-            withCredentials: true, // Important to include cookies in the request
-        });
-        setHouse(response.data.results);
+        const response = await viewRequest(id);
+        setHouse(response.results);
       } catch (error) {
         console.error('Error fetching house details:', error);
       }

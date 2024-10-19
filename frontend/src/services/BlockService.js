@@ -9,26 +9,23 @@ export const listRequest = async () => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
 export const createRequest = async (formData) => {
   try {
     const response = await await axios.post(
-      `${apiUrl}/societies`,
+      `${apiUrl}/blocks`,
       formData,
       {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
         withCredentials: true,
       }
     );
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -44,19 +41,19 @@ export const updateRequest = async (id,formData) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
 export const deleteRequest = async () => {
   try {
-    const response = await axios.get(`${apiUrl}/societies`, {
+    const response = await axios.get(`${apiUrl}/blocks`, {
       withCredentials: true, // Important to include cookies in the request
     });
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -68,7 +65,7 @@ export const viewRequest = async (id) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -83,6 +80,6 @@ export const getSocietyRequest = async (id) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };

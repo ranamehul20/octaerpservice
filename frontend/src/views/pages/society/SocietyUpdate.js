@@ -41,6 +41,7 @@ const SocietyUpdate = () => {
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [logoFile, setLogoFile] = useState(null); 
+  const [isDisabled, setIsDisabled] = useState(false);
 
   // Function to fetch existing society details
   const fetchSocietyDetails = async () => {
@@ -153,20 +154,24 @@ useEffect(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsDisabled(true)
     setError(null)
     setSuccess(false)
     try {
       const res = await updateRequest(id,formData);
       if (res.code === 200 && !res.error) {
         setSuccess(true)
+        setIsDisabled(false);
       } else {
         setError(res.message);
         setSuccess(false)
+        setIsDisabled(false);
       }
       
     } catch (err) {
-      setError('Failed to edit society. Please try again.');
+      setError(err.response.data.errors);
       setSuccess(false)
+      setIsDisabled(false);
     }
   }
 
@@ -180,7 +185,7 @@ useEffect(() => {
           <CCardBody>
             <CForm onSubmit={handleSubmit}>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">Society Name</CFormLabel>
+                <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">Society Name <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
                     type="text"
@@ -194,7 +199,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="street" className="col-sm-2 col-form-label">Address Line 1</CFormLabel>
+                <CFormLabel htmlFor="street" className="col-sm-2 col-form-label">Address Line 1 <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
                     type="text"
@@ -208,7 +213,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="locality" className="col-sm-2 col-form-label">Locality</CFormLabel>
+                <CFormLabel htmlFor="locality" className="col-sm-2 col-form-label">Locality <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
                     type="text"
@@ -222,7 +227,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="country" className="col-sm-2 col-form-label">Country</CFormLabel>
+                <CFormLabel htmlFor="country" className="col-sm-2 col-form-label">Country <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                 <CFormSelect
                   id="country"
@@ -241,7 +246,7 @@ useEffect(() => {
               </CRow>
 
               <CRow className="mb-3">
-                <CFormLabel htmlFor="state" className="col-sm-2 col-form-label">State</CFormLabel>
+                <CFormLabel htmlFor="state" className="col-sm-2 col-form-label">State <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                 <CFormSelect
                   id="state"
@@ -261,7 +266,7 @@ useEffect(() => {
               </CRow>
 
               <CRow className="mb-3">
-                <CFormLabel htmlFor="city" className="col-sm-2 col-form-label">City</CFormLabel>
+                <CFormLabel htmlFor="city" className="col-sm-2 col-form-label">City <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                 <CFormSelect
                   id="city"
@@ -282,7 +287,7 @@ useEffect(() => {
               
               
               <CRow className="mb-3">
-                <CFormLabel htmlFor="zipCode" className="col-sm-2 col-form-label">Zip code</CFormLabel>
+                <CFormLabel htmlFor="zipCode" className="col-sm-2 col-form-label">Zip code <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
                     type="tel"
@@ -309,7 +314,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="type" className="col-sm-2 col-form-label">Society Type</CFormLabel>
+                <CFormLabel htmlFor="type" className="col-sm-2 col-form-label">Society Type <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                 <CFormSelect
                   id="type"
@@ -357,7 +362,7 @@ useEffect(() => {
                   </CCol>
                 </CRow>
               )}
-              <CButton type="submit" color="primary">Submit</CButton>
+              <CButton type="submit" color="primary" disabled={isDisabled}>Submit</CButton>
             </CForm>
             {error && <CAlert color="danger" className="mt-3">{error}</CAlert>}
             {success && <CAlert color="success" className="mt-3">Society updated successfully!</CAlert>}

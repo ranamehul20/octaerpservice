@@ -33,6 +33,7 @@ const HouseUpdate = () => {
   const [selectedSociety, setSelectedSociety] = useState('');
   const [blocks, setBlocks] = useState([]);
   const [selectedBlock, setSelectedBlock] = useState('');
+  const [isDisabled, setIsDisabled] = useState(false);
 
   // Function to fetch existing society details
   const fetchHouseDetails = async () => {
@@ -119,16 +120,20 @@ useEffect(() => {
     e.preventDefault()
     setError(null)
     setSuccess(false)
+    setIsDisabled(true);
     try {
       const res = await updateRequest(id,formData);
       if(res.code === 200 && !res.error){
         setSuccess(true);
+        setIsDisabled(false);
       }
       else{
         setError(res.message);
+        setIsDisabled(false);
       }
     } catch (err) {
-      setError('Failed to create house. Please try again.')
+      setError(err.response.data.errors)
+      setIsDisabled(false)
     }
   }
 
@@ -142,7 +147,7 @@ useEffect(() => {
           <CCardBody>
             <CForm onSubmit={handleSubmit}>
             <CRow className="mb-3">
-                <CFormLabel htmlFor="societyId" className="col-sm-2 col-form-label">Society</CFormLabel>
+                <CFormLabel htmlFor="societyId" className="col-sm-2 col-form-label">Society <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                 <CFormSelect
                   id="societyId"
@@ -159,7 +164,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="blockId" className="col-sm-2 col-form-label">Block</CFormLabel>
+                <CFormLabel htmlFor="blockId" className="col-sm-2 col-form-label">Block <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                 <CFormSelect
                   id="blockId"
@@ -178,7 +183,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">House Number</CFormLabel>
+                <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">House Number <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
                     type="text"
@@ -192,7 +197,7 @@ useEffect(() => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="totalMembers" className="col-sm-2 col-form-label">Type</CFormLabel>
+                <CFormLabel htmlFor="totalMembers" className="col-sm-2 col-form-label">Type <span className="required-asterisk">*</span></CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
                     type="text"
@@ -247,7 +252,7 @@ useEffect(() => {
                   />
                 </CCol>
               </CRow>
-              <CButton type="submit" color="primary">Submit</CButton>
+              <CButton type="submit" color="primary" disabled={isDisabled}>Submit</CButton>
             </CForm>
             {error && <CAlert color="danger" className="mt-3">{error}</CAlert>}
             {success && <CAlert color="success" className="mt-3">House updated successfully!</CAlert>}

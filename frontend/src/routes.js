@@ -1,4 +1,5 @@
 import React from 'react'
+import MemberListView from './views/pages/member/MemberListView'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const SocietyListView = React.lazy(() => import('./views/pages/society/SocietyListView'))
@@ -13,6 +14,10 @@ const HouseListView = React.lazy(() => import('./views/pages/house/HouseListView
 const createHouse = React.lazy(() => import('./views/pages/house/HouseCreate'))
 const updateHouse = React.lazy(() => import('./views/pages/house/HouseUpdate'))
 const houseDetails = React.lazy(() => import('./views/pages/house/HouseDetailsView'))
+const memberListView = React.lazy(() => import('./views/pages/member/MemberListView'))
+const createMember = React.lazy(() => import('./views/pages/member/MemberCreate'))
+const updateMember = React.lazy(() => import('./views/pages/member/MemberUpdate'))
+const memberDetails = React.lazy(() => import('./views/pages/member/MemberDetailsView'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -29,10 +34,10 @@ const routes = [
   { path: '/house/create', name: 'House Create', element:createHouse},
   { path: '/house/edit/:id', name: 'House Update', element:updateHouse},
   { path: '/house/details/:id', name: 'House Details', element:houseDetails},
-  { path: '/member', name: 'Member', element:BlockListView},
-  { path: '/member/create', name: 'Member Create', element:createBlock},
-  { path: '/member/edit/:id', name: 'Member Update', element:createBlock},
-  { path: '/member/details/:id', name: 'Member Details', element:createBlock},
+  { path: '/members', name: 'Member', element:memberListView},
+  { path: '/members/create', name: 'Member Create', element:createMember},
+  { path: '/members/edit/:id', name: 'Member Update', element:updateMember},
+  { path: '/members/details/:id', name: 'Member Details', element:memberDetails},
 ]
 
 export default routes

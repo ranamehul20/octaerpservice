@@ -8,7 +8,7 @@ export const listRequest = async () => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -27,7 +27,7 @@ export const createRequest = async (formData) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -42,7 +42,7 @@ export const updateRequest = async (id,formData) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -54,7 +54,7 @@ export const deleteRequest = async () => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -69,7 +69,7 @@ export const viewRequest = async (id) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -84,7 +84,7 @@ export const getCity = async (selectedState) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -99,7 +99,7 @@ export const getState = async (selectedCountry) => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
   }
 };
 
@@ -114,6 +114,20 @@ export const getCountry = async () => {
     console.log("Success", response);
     return response.data;
   } catch (err) {
-    throw error;
+    throw err;
+  }
+};
+
+export const getStaticValues = async () => {
+  try {
+    const response = await axios.get(`${apiUrl}/config/staticvalue`,
+      {
+        withCredentials: true, // Important to include cookies in the request
+      }
+    );
+    console.log("Success", response);
+    return response.data;
+  } catch (err) {
+    throw err;
   }
 };

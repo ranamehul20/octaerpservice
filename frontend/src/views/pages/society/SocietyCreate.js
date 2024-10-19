@@ -39,6 +39,7 @@ const SocietyCreate = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+  const [isDisabled, setIsDisabled] = useState(false);
 
   // Fetch countries on component mount
   useEffect(() => {
@@ -129,9 +130,9 @@ const SocietyCreate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsDisabled(true);
     setError(null);
     setSuccess(false);
-
     try {
       const response = await createRequest(formData);
       if (response.code === 200 && !response.error) {
@@ -150,11 +151,16 @@ const SocietyCreate = () => {
           registrationNumber: "",
         });
         setPreviewLogo(null);
+        setIsDisabled(false);
       }else{
-        setError(response.message);
+        console.log("error",response);
+        setError(response.errors);
+        setIsDisabled(false);
       }
     } catch (err) {
-      setError("Failed to create society. Please try again.");
+      console.log("error",err.response.data.errors);
+      setError(err.response.data.errors);
+      setIsDisabled(false);
     }
   };
 
@@ -169,7 +175,7 @@ const SocietyCreate = () => {
             <CForm onSubmit={handleSubmit}>
               <CRow className="mb-3">
                 <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">
-                  Society Name
+                  Society Name <span className="required-asterisk">*</span>
                 </CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
@@ -188,7 +194,7 @@ const SocietyCreate = () => {
                   htmlFor="street"
                   className="col-sm-2 col-form-label"
                 >
-                  Address Line 1
+                  Address Line 1 <span className="required-asterisk">*</span>
                 </CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
@@ -207,7 +213,7 @@ const SocietyCreate = () => {
                   htmlFor="locality"
                   className="col-sm-2 col-form-label"
                 >
-                  Locality
+                  Locality <span className="required-asterisk">*</span>
                 </CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
@@ -226,7 +232,7 @@ const SocietyCreate = () => {
                   htmlFor="country"
                   className="col-sm-2 col-form-label"
                 >
-                  Country
+                  Country <span className="required-asterisk">*</span>
                 </CFormLabel>
                 <CCol sm={10}>
                   <CFormSelect
@@ -247,7 +253,7 @@ const SocietyCreate = () => {
 
               <CRow className="mb-3">
                 <CFormLabel htmlFor="state" className="col-sm-2 col-form-label">
-                  State
+                  State <span className="required-asterisk">*</span>
                 </CFormLabel>
                 <CCol sm={10}>
                   <CFormSelect
@@ -269,7 +275,7 @@ const SocietyCreate = () => {
 
               <CRow className="mb-3">
                 <CFormLabel htmlFor="city" className="col-sm-2 col-form-label">
-                  City
+                  City <span className="required-asterisk">*</span>
                 </CFormLabel>
                 <CCol sm={10}>
                   <CFormSelect
@@ -294,7 +300,7 @@ const SocietyCreate = () => {
                   htmlFor="zipCode"
                   className="col-sm-2 col-form-label"
                 >
-                  Zip code
+                  Zip code <span className="required-asterisk">*</span>
                 </CFormLabel>
                 <CCol sm={10}>
                   <CFormInput
@@ -328,7 +334,7 @@ const SocietyCreate = () => {
               </CRow>
               <CRow className="mb-3">
                 <CFormLabel htmlFor="type" className="col-sm-2 col-form-label">
-                  Society Type
+                  Society Type <span className="required-asterisk">*</span>
                 </CFormLabel>
                 <CCol sm={10}>
                   <CFormSelect
@@ -392,7 +398,7 @@ const SocietyCreate = () => {
                   </CCol>
                 </CRow>
               )}
-              <CButton type="submit" color="primary">
+              <CButton type="submit" color="primary" disabled={isDisabled}>
                 Submit
               </CButton>
             </CForm>
