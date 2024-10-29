@@ -32,6 +32,7 @@ export const verifyToken = async (req, res, next) => {
   }
   try {
     const decode = await jwt.verify(accessToken, process.env.JWT_SECRET);
+    console.log("decode",decode);
     if (!decode) {
       if (!refreshToken) {
         return res
@@ -67,8 +68,9 @@ export const verifyToken = async (req, res, next) => {
             .status(404)
             .json(errors("User not found!", res.statusCode));
         req.user = userDetails;
-        if (userDetails.role == SUPER_ADMIN && !userDetails.societyId)
+        if (userDetails.role == SUPER_ADMIN){
           req.user["isAdmin"] = true;
+        }
         next();
       } catch (error) {
         return res.status(400).send("Invalid Token.");
@@ -82,8 +84,9 @@ export const verifyToken = async (req, res, next) => {
         .status(404)
         .json(errors("User not found!", res.statusCode));
     req.user = userDetails;
-    if (userDetails.role == SUPER_ADMIN && !userDetails.societyId)
+    if (userDetails.role == SUPER_ADMIN){
       req.user["isAdmin"] = true;
+    }
     next();
   } catch (e) {
     console.log("Error while verifying token", e);
@@ -109,11 +112,11 @@ export const emailValidator = (email) => {
   return re.test(email);
 };
 
-export const userValidator = async (user) => {
+export const userValidator = async (user,method='create') => {
   const errors = {};
   console.log(user);
   if (!emailValidator(user.email)) errors.email = "Invalid Email";
-  if (!user.password) errors.password = "Password is required";
+  if (!user.password && method!='update') errors.password = "Password is required";
   if (!user.role) errors.role = "Role is required";
   if (!user.firstname) errors.firstname = "Firstname is required";
   if (!user.lastname) errors.lastname = "Lastname is required";
@@ -211,6 +214,9 @@ export const societyValidator = async (society) => {
   if (!society.state) error.state = "State is required";
   if (!society.country) error.country = "Country is required";
   if (!society.type) error.type = "Society type is required";
+  if (!society.maintenanceAmount) error.maintenanceAmount = "Maintenance Amount is required";
+  if (!society.maintenanceFrequency) error.maintenanceFrequency = "Maintenance Frequency is required";
+  if (!society.dueDay) error.dueDay = "Due Day is required";
   if (society.city) {
     const cityId = await Cities.findOne({ id: society.city });
     if (!cityId) error.city = "City is not found";

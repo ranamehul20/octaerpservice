@@ -10,9 +10,9 @@ router.post('/login',Login);
 router.post('/adminlogin',AdminLogin);
 router.post('/logout',Logout);
 router.get('/check',Check);
-router.get('/',ListMembers);
+router.get('/',verifyToken,ListMembers);
 router.get('/testmail',TestEmails);
-router.post('/changepassword',ChangePassword);
+router.post('/changepassword',verifyToken,ChangePassword);
 
 
 

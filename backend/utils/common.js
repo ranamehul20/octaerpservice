@@ -43,3 +43,13 @@ export const success = (message, results, statusCode) => {
       errors
     };
   };
+
+export const dateConverter = (data) => {
+
+// Create a Date object from the ISO string
+const date = new Date(data);
+
+// Format it to "yyyy-MM-dd"
+const formattedDate = date.toISOString().split('T')[0];
+return formattedDate;
+};

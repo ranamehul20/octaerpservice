@@ -14,7 +14,12 @@ import {
   CImage,
 } from "@coreui/react";
 import axios from "axios";
-import { createRequest,getCity,getState, getCountry } from "../../../services/SocietyService";
+import {
+  createRequest,
+  getCity,
+  getState,
+  getCountry,
+} from "../../../services/SocietyService";
 
 const SocietyCreate = () => {
   const [formData, setFormData] = useState({
@@ -29,6 +34,10 @@ const SocietyCreate = () => {
     type: "",
     logo: null,
     registrationNumber: "",
+    maintenanceAmount: "",
+    maintenanceFrequency: "",
+    dueDay: "",
+    latePaymentPenalty: "",
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -122,11 +131,25 @@ const SocietyCreate = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleMaintenanceFreqSelect = (e) => {
+    setFormData({...formData, [e.target.name]: e.target.value });
+  };
+
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     setFormData({ ...formData, logo: file });
     setPreviewLogo(URL.createObjectURL(file));
   };
+
+    // Handle input change and restrict to numbers only
+    const handleInputChange = (e) => {
+      const value = e.target.value;
+      // Allow only numbers using a regular expression
+      if (/^\d*$/.test(value)) {
+        setFormData({...formData, [e.target.name]: value });
+      }
+    };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -149,16 +172,20 @@ const SocietyCreate = () => {
           type: "",
           logo: null,
           registrationNumber: "",
+          maintenanceAmount: "",
+          maintenanceFrequency: "",
+          dueDay: "",
+          latePaymentPenalty: "",
         });
         setPreviewLogo(null);
         setIsDisabled(false);
-      }else{
-        console.log("error",response);
+      } else {
+        console.log("error", response);
         setError(response.errors);
         setIsDisabled(false);
       }
     } catch (err) {
-      console.log("error",err.response.data.errors);
+      console.log("error", err.response.data.errors);
       setError(err.response.data.errors);
       setIsDisabled(false);
     }
@@ -167,12 +194,12 @@ const SocietyCreate = () => {
   return (
     <CRow>
       <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>Create Society</strong>
-          </CCardHeader>
-          <CCardBody>
-            <CForm onSubmit={handleSubmit}>
+        <CForm onSubmit={handleSubmit}>
+          <CCard className="mb-4">
+            <CCardHeader>
+              <strong>Create Society</strong>
+            </CCardHeader>
+            <CCardBody>
               <CRow className="mb-3">
                 <CFormLabel htmlFor="name" className="col-sm-2 col-form-label">
                   Society Name <span className="required-asterisk">*</span>
@@ -250,7 +277,6 @@ const SocietyCreate = () => {
                   </CFormSelect>
                 </CCol>
               </CRow>
-
               <CRow className="mb-3">
                 <CFormLabel htmlFor="state" className="col-sm-2 col-form-label">
                   State <span className="required-asterisk">*</span>
@@ -272,7 +298,6 @@ const SocietyCreate = () => {
                   </CFormSelect>
                 </CCol>
               </CRow>
-
               <CRow className="mb-3">
                 <CFormLabel htmlFor="city" className="col-sm-2 col-form-label">
                   City <span className="required-asterisk">*</span>
@@ -294,7 +319,6 @@ const SocietyCreate = () => {
                   </CFormSelect>
                 </CCol>
               </CRow>
-
               <CRow className="mb-3">
                 <CFormLabel
                   htmlFor="zipCode"
@@ -398,22 +422,95 @@ const SocietyCreate = () => {
                   </CCol>
                 </CRow>
               )}
+            </CCardBody>
+          </CCard>
+          {/* New Section: Maintenance Settings */}
+          <CCard className="mt-4">
+            <CCardHeader>Maintenance Settings</CCardHeader>
+            <CCardBody>
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="maintenanceAmount" className="col-sm-2 col-form-label">
+                  Maintenance Amount<span className="required-asterisk">*</span>
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="text"
+                    id="maintenanceAmount"
+                    name="maintenanceAmount"
+                    placeholder="Enter maintenance amount"
+                    value={formData.maintenanceAmount}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </CCol>
+              </CRow>
+
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="maintenanceFrequency" className="col-sm-2 col-form-label">
+                  Maintenance Frequency <span className="required-asterisk">*</span>
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormSelect
+                    id="maintenanceFrequency"
+                    name="maintenanceFrequency"
+                    value={formData.maintenanceFrequency}
+                    onChange={handleMaintenanceFreqSelect}
+                    required
+                  >
+                    <option value="">Select</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="annually">Annually</option>
+                  </CFormSelect>
+                </CCol>
+              </CRow>
+
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="dueDay" className="col-sm-2 col-form-label">Due Date <span className="required-asterisk">*</span></CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="text"
+                    id="dueDay"
+                    name="dueDay"
+                    placeholder="Due Days of the month like 1,2,3"
+                    value={formData.dueDay}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </CCol>
+              </CRow>
+
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="latePaymentPenalty" className="col-sm-2 col-form-label">
+                  Late Payment Penalty
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="number"
+                    id="latePaymentPenalty"
+                    name="latePaymentPenalty"
+                    placeholder="Enter late payment penalty"
+                    value={formData.latePaymentPenalty}
+                    onChange={handleChange}
+                  />
+                </CCol>
+              </CRow>
               <CButton type="submit" color="primary" disabled={isDisabled}>
                 Submit
               </CButton>
-            </CForm>
-            {error && (
-              <CAlert color="danger" className="mt-3">
-                {error}
-              </CAlert>
-            )}
-            {success && (
-              <CAlert color="success" className="mt-3">
-                Society created successfully!
-              </CAlert>
-            )}
-          </CCardBody>
-        </CCard>
+            </CCardBody>
+          </CCard>
+          {error && (
+            <CAlert color="danger" className="mt-3">
+              {error}
+            </CAlert>
+          )}
+          {success && (
+            <CAlert color="success" className="mt-3">
+              Society created successfully!
+            </CAlert>
+          )}
+        </CForm>
       </CCol>
     </CRow>
   );

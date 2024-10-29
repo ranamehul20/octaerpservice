@@ -3,6 +3,7 @@ import {States } from "../models/States.js";
 import { Cities } from "../models/Cities.js";
 import { SocietyMst } from "../models/SocietyMst.js";
 import { success, errors, validation } from "../utils/common.js";
+import {generateBills} from "../controllers/MaintenanceController.js";
 
 // Country listing Methods
 export const listingCountries  = async (req, res, next) => {
@@ -130,4 +131,8 @@ export const staticValues = (req, res) => {
     };
     res.status(200).json(success("Static Values Fetched Successfully",{"societyTypes":societyTypes,"userTypes":userTypes},res.statusCode));
   } catch (err) { res.status(500).json(errors(err.message, res.statusCode)); }
+};
+
+export const testCron = (req, res) => {
+  generateBills();
 };

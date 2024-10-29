@@ -12,6 +12,7 @@ import {
   CAlert,
   CFormSelect,
 } from "@coreui/react";
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   getStaticValues,
   getCountry,
@@ -23,10 +24,12 @@ import {
   getSocietyRequest,
   getBlockRequest,
   getHouseRequest,
-  viewRequest
+  viewRequest,
+  updateRequest
 } from "../../../services/MemberService";
 
 const MemberUpdate = () => {
+    const { id } = useParams();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -74,6 +77,9 @@ const MemberUpdate = () => {
         setSelectedCountry(data.country);
         setSelectedState(data.state);
         setSelectedCity(data.city);
+        setSelectedSociety(data.societyId);
+        setSelectedBlock(data.blockNumber);
+        setSelectedHouse(data.houseNumber);
       }
     } catch (error) {
       console.error('Failed to fetch society details:', error);
@@ -252,30 +258,13 @@ const MemberUpdate = () => {
     setError(null);
     setSuccess(false);
     try {
-      await createRequest(formData);
-      setSuccess(true);
-      setFormData({
-        email: "",
-        password: "",
-        role: "",
-        isDefaultPassword: "",
-        firstname: "",
-        lastname: "",
-        phoneNumber: "",
-        dateOfBirth: "",
-        blockNumber: "",
-        houseNumber: "",
-        societyId: "",
-        totalMembers: "",
-        street: "",
-        locality: "",
-        city: "",
-        state: "",
-        country: "",
-        zipCode: "",
-      });
+        console.log('update user');
+      const response = await updateRequest(id,formData);
+      if(response.code === 200 && !response.error) {
+        setSuccess(true);
+      }
     } catch (err) {
-      setError("Failed to create house. Please try again.");
+      setError("Failed to update details. Please try again.");
     }
   };
 
@@ -284,7 +273,7 @@ const MemberUpdate = () => {
       <CCol xs={12}>
         <CCard className="mb-4">
           <CCardHeader>
-            <strong>Create Members</strong>
+            <strong>Update Members</strong>
           </CCardHeader>
           <CCardBody>
             <CForm onSubmit={handleSubmit}>

@@ -19,6 +19,16 @@ const SocietyMstSchema = new Schema({
         bankBranch: {type: String, required: false},
         bankAccountNumber: {type: String, required: false},
         bankIFSCCode: {type: String, required: false},
+        // Maintenance Settings
+        maintenanceAmount: { type: Number, required: true }, // Amount to be paid
+        maintenanceFrequency: { type: String, enum: ['monthly', 'quarterly', 'annually'], required: true }, // How often maintenance is due
+        dueDay: { type: Number, required: true , default: 10}, // Maintenance due date
+        latePaymentPenalty: { type: Number, default: 0 }, // Penalty for late payment
+        
+        // Optional additional fields
+        lastPaymentDate: { type: Date }, // Last maintenance payment date for tracking
+        totalCollectedMaintenance: { type: Number, default: 0 }, // Track total collected maintenance
+
     },
     createdBy: {type:ObjectId, ref: 'User', required:false},
     updatedBy: {type:ObjectId,ref: 'User', required:false}

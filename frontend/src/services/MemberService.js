@@ -14,7 +14,7 @@ export const listRequest = async () => {
 
 export const createRequest = async (formData) => {
   try {
-    const response = await await axios.post(
+    const response =  await axios.post(
       `${apiUrl}/auth/register`,
       formData,
       {
@@ -28,9 +28,10 @@ export const createRequest = async (formData) => {
   }
 };
 
-export const updateRequest = async (formData) => {
+export const updateRequest = async (id,formData) => {
   try {
-    const response = await await axios.post(
+    console.log("Success", formData);
+    const response =  await axios.post(
       `${apiUrl}/members/${id}`,
       formData,
       {

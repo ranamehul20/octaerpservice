@@ -1,5 +1,5 @@
 import { SocietyMst } from "../models/SocietyMst.js";
-import { success, errors, validation } from "../utils/common.js";
+import { success, errors, validation, dateConverter } from "../utils/common.js";
 import { societyValidator } from "../utils/validator.js";
 // Society Create Method
 export const createSociety = async (req, res, next) => {
@@ -36,6 +36,10 @@ export const createSociety = async (req, res, next) => {
         bankBranch: data.bankBranch ?? "",
         bankAccountNumber: data.bankAccountNumber ?? "",
         bankIFSCCode: data.bankIFSCCode ?? "",
+        maintenanceAmount: data.maintenanceAmount?? 0,
+        maintenanceFrequency: data.maintenanceFrequency?? "monthly",
+        dueDay: data.dueDay?? 10,
+        latePaymentPenalty: data.latePaymentPenalty?? 0,
       },
     });
     console.log(society);
@@ -120,6 +124,10 @@ export const updateSociety = async (req, res, next) => {
           bankAccountNumber: data.bankAccountNumber,
           bankIFSCCode: data.bankIFSCCode,
           logo: req.file ? req.file.path : data.logo,
+          maintenanceAmount: data.maintenanceAmount?? 0,
+          maintenanceFrequency: data.maintenanceFrequency?? "monthly",
+          dueDay: data.dueDay?? 10,
+          latePaymentPenalty: data.latePaymentPenalty?? 0,
         },
         updatedAt: new Date(),
         updatedBy: req.user._id,
@@ -147,9 +155,34 @@ export const SocietyDetail = async (req, res, next) => {
     const societyDetails = await SocietyMst.findById(req.params.id);
     if (societyDetails) {
       // await session.commitTransaction();
+      let details = {
+        _id: societyDetails._id,
+        name: societyDetails.name,
+        street: societyDetails.street,
+        locality: societyDetails.locality,
+        state: societyDetails.state,
+        city: societyDetails.city,
+        country: societyDetails.country,
+        zipCode: societyDetails.zipCode,
+        type: societyDetails.type,
+        settings: {
+          currency: societyDetails.settings.currency,
+          registrationNumber: societyDetails.settings.registrationNumber,
+          bankDetails: societyDetails.settings.bankDetails,
+          bankName: societyDetails.settings.bankName,
+          bankBranch: societyDetails.settings.bankBranch,
+          bankAccountNumber: societyDetails.settings.bankAccountNumber,
+          bankIFSCCode: societyDetails.settings.bankIFSCCode,
+          logo: societyDetails.settings.logo,
+          maintenanceAmount: societyDetails.settings.maintenanceAmount,
+          maintenanceFrequency: societyDetails.settings.maintenanceFrequency,
+          dueDay: societyDetails.settings.dueDay,
+          latePaymentPenalty: societyDetails.settings.latePaymentPenalty,
+        },
+      }
       res
        .status(200)
-       .json(success("Society details fetched successfully", societyDetails, res.statusCode));
+       .json(success("Society details fetched successfully", details, res.statusCode));
       return next();
     }
     res.status(404).json(errors("Society not found", res.statusCode));

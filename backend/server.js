@@ -8,6 +8,7 @@ import SettingRoutes from "./routes/SettingsRoutes.js";
 import BlockRoutes from "./routes/BlockRoutes.js";
 import HouseRoutes from "./routes/HouseRoutes.js";
 import MemberRoutes from "./routes/MemberRoutes.js";
+import MaintenanceRoute from "./routes/MaintenanceRoutes.js";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from 'morgan';
@@ -15,6 +16,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import winston  from 'winston';
 import cookieParser from 'cookie-parser';
+import {runTask} from './scheduler/maintenanceScheduler.js';
 
 const PORT  = process.env.PORT || 3001 ;
 const app = express();
@@ -59,11 +61,14 @@ app.use("/api/houses", HouseRoutes);
 app.use("/api/blocks", BlockRoutes);
 app.use("/api/config",SettingRoutes);
 app.use("/api/members",MemberRoutes);
+app.use("/api/maintenance",MaintenanceRoute);
 // Handle React routing, return index.html file from the build
 // app.get('*', (req, res) => {
 //     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 // });
 
+// Schedule routes
+runTask();
 //listen to the port
 app.listen(PORT, ()=> {
 console.log(`listening to port ${PORT}`);

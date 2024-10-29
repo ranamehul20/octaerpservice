@@ -1,12 +1,13 @@
 import { User } from "../models/UserModel.js";
 import jwt from "jsonwebtoken";
 import { userValidator } from "../utils/validator.js";
-import { success, errors, validation } from "../utils/common.js";
+import { success, errors, validation,dateConverter } from "../utils/common.js";
 import { UserDetails } from "../models/UserDetailsModel.js";
 import { serialize } from "cookie";
 import { sendWelcomeEmail } from "../utils/mailConfig.js";
 import { BlockMst } from "../models/BlockMst.js";
-import { SUPER_ADMIN } from "../utils/constants.js";
+import { SUPER_ADMIN,CHAIRMEN } from "../utils/constants.js";
+import Schema from "mongoose";
 
 // register method
 export const Register = async (req, res, next) => {
@@ -55,6 +56,7 @@ export const Register = async (req, res, next) => {
         totalMembers: data.totalMembers ?? '',
         street: data.street ?? '',
         locality: data.locality ?? '',
+        city: data.city ?? '',
         state: data.state ?? '',
         country: data.country ?? '',
         zipCode: data.zipCode ?? '',
@@ -312,7 +314,7 @@ export const ListMembers = async (req, res, next) => {
       const user = [];
       users.forEach((item) => {
         user.push({
-          _id: item._id,
+          _id: item.userId._id,
           name: item.firstName + " " + item.lastName,
           email: item.userId.email,
           role: item.userId.role,
@@ -362,8 +364,8 @@ export const ChangePassword = async (req, res, next) => {
     if (!isMatch) {
       return res.status(400).json(errors("Wrong password", res.statusCode));
     }
-    const salt = await bcrypt.genSalt(10);
-    user.password = bcrypt.hashSync(newPassword, salt);
+    user.password = newPassword;
+    user.isDefaultPassword = false;
     await user.save();
     res.status(200).json(success("Password changed successfully", {}, res.statusCode));
   } catch (error) {
@@ -380,7 +382,7 @@ export const UpdateDetails = async (req, res, next) => {
     if (data.role) {
       data.userType = data.role;
     }
-    const validator = await userValidator(data);
+    const validator = await userValidator(data,'update');
     console.log(validator);
     if (!validator.isValid) {
       res
@@ -388,25 +390,114 @@ export const UpdateDetails = async (req, res, next) => {
         .json(validation(Object.values(validator.errors).join(",")));
       return next();
     }
-    const user = await User.findOne({ email: data.email });
+    const user = await User.findOne({ email: data.email,_id:{$ne:req.params.id} });
     if (user) {
       res.status(422).json(validation("This user already exist"));
       return next();
     }
+    const currentUser = await User.findOne({ _id: req.params.id});
+    if(currentUser.role != data.role && currentUser.role == CHAIRMEN) {
+     const checkRole = await User.findOne({ role: CHAIRMEN,_id:{$ne:req.params.id} });
+     if(!checkRole){
+      res.status(422).json(validation("This user role cannot be changed. Please create another user first for this role"));
+      return next();
+     }
+    }
+    let updateData={
+      email: data.email ?? user.email,
+      role: data.role ?? user.role
+    }
+    let updateDetails={
+      firstName: data.firstname ?? user.firstName,
+      lastName: data.lastname?? user.lastName,
+      phoneNumber: data.phoneNumber?? user.phoneNumber,
+      dateOfBirth: data.dateOfBirth?? user.dateOfBirth,
+      street: data.street ?? user.street,
+      locality: data.locality?? user.locality,
+      city: data.city?? user.city,
+      state: data.state?? user.state,
+      country: data.country?? user.country,
+      zipCode: data.zipCode?? user.zipCode,
+      userType: updateData.role,
+      totalMembers: data.totalMembers ?? user.totalMembers,
+      societyId: data.societyId?? user.societyId,
+      blockNumber: data.blockNumber?? user.blockNumber,
+      houseNumber: data.houseNumber?? user.houseNumber,
+    }
 
-    const updatedUser = await User.findByIdAndUpdate(req.user.id, {
-      firstName,
-      lastName,
-      phoneNumber,
-      dateOfBirth,
-      address,
-    });
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData);
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json(errors("User not found", res.statusCode));
+    }
+    console.log(updatedUser);
+    const updatedUserDetails = await UserDetails.findOneAndUpdate({"userId":updatedUser._id}, updateDetails);
+    if (!updatedUserDetails) {
+      return res
+       .status(404)
+       .json(errors("User details not found", res.statusCode));
+    }
+    let userDetails= {
+        _id: updatedUser._id,
+        firstname: updatedUserDetails.firstName,
+        lastname: updatedUserDetails.lastName,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        phoneNumber: updatedUserDetails.phoneNumber,
+        dateOfBirth: dateConverter(updatedUserDetails.dateOfBirth),
+        street: updatedUserDetails.street,
+        locality: updatedUserDetails.locality,
+        city: updatedUserDetails.city,
+        state: updatedUserDetails.state,
+        country: updatedUserDetails.country,
+        zipCode: updatedUserDetails.zipCode,
+        societyId:updatedUserDetails.societyId,
+        blockNumber:updatedUserDetails.blockNumber,
+        houseNumber:updatedUserDetails.houseNumber,
+        totalMembers:updatedUserDetails.totalMembers,
+      };
+    res.status(200).json(success("User details updated successfully", userDetails, res.statusCode));
+  } catch (error) {
+    res.status(500).json(errors(error.message, res.statusCode));
+    // await session.abortTransaction();
+    next(error);
+  }
+};
+
+// get user details
+export const GetUserDetails = async (req, res, next) => {
+  try {
+    console.log("GetUserDetails");
+    const user = await UserDetails.find({userId:req.params.id}).populate('userId');
     if (!user) {
       return res
         .status(404)
         .json(errors("User not found", res.statusCode));
     }
-    res.status(200).json(success("User details updated successfully", {}, res.statusCode));
+    let userDetails= null;
+    user.forEach((item) => {
+      userDetails={
+        _id: item.userId._id,
+        firstname: item.firstName,
+        lastname: item.lastName,
+        email: item.userId.email,
+        role: item.userId.role,
+        phoneNumber: item.phoneNumber,
+        dateOfBirth: dateConverter(item.dateOfBirth),
+        street: item.street,
+        locality: item.locality,
+        city: item.city,
+        state: item.state,
+        country: item.country,
+        zipCode: item.zipCode,
+        societyId:item.societyId,
+        blockNumber:item.blockNumber,
+        houseNumber:item.houseNumber,
+        totalMembers:item.totalMembers,
+      };
+    });
+    res.status(200).json(success("User details fetched successfully", userDetails, res.statusCode));
   } catch (error) {
     res.status(500).json(errors(error.message, res.statusCode));
     // await session.abortTransaction();

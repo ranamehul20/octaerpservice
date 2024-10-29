@@ -1,9 +1,12 @@
 import express from "express";
-import { ListMembers } from "../controllers/UserController.js";
+import {verifyToken} from "../utils/validator.js";
+import { ListMembers,UpdateDetails,GetUserDetails } from "../controllers/UserController.js";
 const router = express.Router();
 
 
-router.get('/',ListMembers);
+router.get('/',verifyToken,ListMembers);
+router.post('/:id',verifyToken,UpdateDetails);
+router.get('/:id',verifyToken,GetUserDetails);
 
 
 
