@@ -8,6 +8,8 @@ import { sendWelcomeEmail } from "../utils/mailConfig.js";
 import { BlockMst } from "../models/BlockMst.js";
 import { SUPER_ADMIN,CHAIRMEN } from "../utils/constants.js";
 import Schema from "mongoose";
+import {sendEmail} from "../utils/mailConfig.js";
+import { DeviceMst } from "../models/DeviceMst.js";
 
 // register method
 export const Register = async (req, res, next) => {
@@ -108,6 +110,20 @@ export const Login = async (req, res, next) => {
     const isMatch = await user.matchPassword(req.body.password);
     if (!isMatch)
       return res.status(400).json(errors("wrong password", res.statusCode));
+    const details = await UserDetails.findOne({ userId: user._id });
+    if(req.body.deviceId){
+      const device = await DeviceMst.findOne({ deviceId:req.body.deviceId });
+      if(!device){
+        const deviceModel = new DeviceMst({
+          deviceId: req.body.deviceId,
+          userId: user._id,
+          blockNumber: details.blockNumber,
+          societyId: details.societyId,
+          houseNumber: details.houseNumber
+        });
+        await deviceModel.save();
+      } 
+    }
     const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
@@ -133,14 +149,25 @@ export const Login = async (req, res, next) => {
     });
     res.cookie("refreshToken", serialized);
     res.cookie("accessToken", authSerialized);
-    const { password, ...otherDetails } = user._doc;
+    const response={
+      _id:user._id,
+      email: user.email,
+      role: user.role,
+      isDefaultPassword: user.isDefaultPassword,
+      firstName: details.firstName,
+      lastName: details.lastName,
+      societyId: details.societyId,
+      blockNumber: details.blockNumber,
+      houseNumber: details.houseNumber,
+      createdAt: details.createdAt
+    };
     console.log("success");
     res
       .status(200)
       .json(
         success(
           "Logged in Successfull",
-          { user: { ...otherDetails } },
+          response,
           res.statusCode
         )
       );
@@ -424,7 +451,18 @@ export const UpdateDetails = async (req, res, next) => {
       blockNumber: data.blockNumber?? user.blockNumber,
       houseNumber: data.houseNumber?? user.houseNumber,
     }
+    const originalData = await User.findOne({ _id:req.params.id});
+    // Save the original and updated values in the change log
+    const log = new ChangeLog({
+     method: req.method,
+     collectionName: 'User',
+     url: req.url,
+     originalData: originalData.toObject(),
+     updatedData: updateData
+   });
 
+   await log.save();
+   console.log("Change log saved successfully");
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData);
     if (!updatedUser) {
       return res
@@ -432,6 +470,18 @@ export const UpdateDetails = async (req, res, next) => {
         .json(errors("User not found", res.statusCode));
     }
     console.log(updatedUser);
+    const originalData1 = await UserDetails.findOne({"userId":updatedUser._id});
+    // Save the original and updated values in the change log
+    const log1 = new ChangeLog({
+     method: req.method,
+     collectionName: 'UserDetails',
+     url: req.url,
+     originalData: originalData1.toObject(),
+     updatedData: updateDetails
+   });
+
+   await log1.save();
+   console.log("Change log saved successfully");
     const updatedUserDetails = await UserDetails.findOneAndUpdate({"userId":updatedUser._id}, updateDetails);
     if (!updatedUserDetails) {
       return res
@@ -469,7 +519,7 @@ export const UpdateDetails = async (req, res, next) => {
 export const GetUserDetails = async (req, res, next) => {
   try {
     console.log("GetUserDetails");
-    const user = await UserDetails.find({userId:req.params.id}).populate('userId');
+    const user = await UserDetails.find({userId:req.params.id}).populate('userId').populate('blockNumber').populate('houseNumber').populate('societyId');
     if (!user) {
       return res
         .status(404)
@@ -483,6 +533,7 @@ export const GetUserDetails = async (req, res, next) => {
         lastname: item.lastName,
         email: item.userId.email,
         role: item.userId.role,
+        roleName: item.userId.role == process.env.SUPER_ADMIN ? 'Super Admin' : item.userId.role == process.env.CHAIRMEN ? 'Chairman' : item.userId.role == process.env.MEMBERS ? 'House Owner' : 'TENANT',
         phoneNumber: item.phoneNumber,
         dateOfBirth: dateConverter(item.dateOfBirth),
         street: item.street,
@@ -491,9 +542,12 @@ export const GetUserDetails = async (req, res, next) => {
         state: item.state,
         country: item.country,
         zipCode: item.zipCode,
-        societyId:item.societyId,
-        blockNumber:item.blockNumber,
-        houseNumber:item.houseNumber,
+        societyId:item.societyId._id,
+        societyName: item.societyId.name,
+        blockNumber:item.blockNumber._id,
+        blockName:item.blockNumber.name,
+        houseNumber:item.houseNumber._id,
+        houseName:item.houseNumber.name,
         totalMembers:item.totalMembers,
       };
     });
@@ -504,3 +558,52 @@ export const GetUserDetails = async (req, res, next) => {
     next(error);
   }
 };
+
+// forgot password
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res
+        .status(404)
+        .json(errors("User not found", res.statusCode));
+    }
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "2h"  });
+    const url = `${process.env.FRONT_URL}/reset-password/${token}`;
+    const response = await sendEmail(user.email, "Reset Password", `Click on the following link to reset your password: ${url}`);
+    res.status(200).json(success("Reset password email sent successfully", {}, res.statusCode));
+  } catch (error) {
+    res.status(500).json(errors(error.message));
+    // await session.abortTransaction();
+    next(error);
+  }
+};
+
+// reset password
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded) {
+      return res
+        .status(401)
+        .json(errors("Invalid token", res.statusCode));
+    }
+    const user = await User.findBy_id(decoded.id);
+    if (!user) {
+      return res
+        .status(404)
+        .json(errors("User not found", res.statusCode));
+    }
+    user.password = password;
+    user.isDefaultPassword=false;
+    await user.save();
+    res.status(200).json(success("Password reset successfully", {}, res.statusCode));
+  } catch (error) {
+    res.status(500).json(errors(error.message));
+    // await session.abortTransaction();
+    next();
+  }
+};
+

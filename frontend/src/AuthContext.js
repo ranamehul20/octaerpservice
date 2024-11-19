@@ -25,12 +25,10 @@ export const AuthProvider = ({ children }) => {
       } else {
         setIsAuthenticated(false);
         setLoading(false);
-        navigate("/login");
       }
     }catch(e){
       setIsAuthenticated(false);
         setLoading(false);
-        navigate("/login");
     }
   };
   useEffect(() => {
@@ -48,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, checkAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );

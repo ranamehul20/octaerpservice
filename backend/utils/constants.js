@@ -4,3 +4,7 @@ export const MEMBER = 3;
 export const TENANT = 4;
 export const WELCOME_TITLE_EMAIL = "Welcome to Octa ERP Service";
 export const WELCOME_MESSAGE_EMAIL = "Hi! Thank you for registering. Your password is:";
+export const NOTICE_DEFAULT=1;
+export const NOTICE_BLOCK_WISE = 2;
+export const NOTICE_STATUS_PENDING = "pending";
+export const NOTICE_STATUS_SENT = "sent";

@@ -1,4 +1,5 @@
 import { BlockMst } from "../models/BlockMst.js";
+import { ChangeLogs } from "../models/ChangeLogs.js";
 import { blockValidator } from "../utils/validator.js";
 import { success, errors, validation } from "../utils/common.js";
 import Schema from "mongoose";
@@ -127,6 +128,20 @@ export const updateBlocks = async (req, res, next) => {
       res.status(422).json(validation("This block already exist"));
       return next();
     }
+
+    const originalData = await BlockMst.findOne({ _id:req.params.id});
+     // Save the original and updated values in the change log
+     const log = new ChangeLog({
+      method: req.method,
+      collectionName: 'BlockMst',
+      url: req.url,
+      originalData: originalData.toObject(),
+      updatedData: data
+    });
+
+    await log.save();
+    console.log("Change log saved successfully");
+
     const block = await BlockMst.findByIdAndUpdate(
       req.params.id,
       {

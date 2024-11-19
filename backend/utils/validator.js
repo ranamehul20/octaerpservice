@@ -1,16 +1,16 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { SUPER_ADMIN } from "./constants.js";
+import { SUPER_ADMIN, NOTICE_BLOCK_WISE, NOTICE_DEFAULT } from "./constants.js";
 import { HouseMst } from "../models/HouseMst.js";
 import { BlockMst } from "../models/BlockMst.js";
 import { SocietyMst } from "../models/SocietyMst.js";
 import { User } from "../models/UserModel.js";
-import { UserDetails } from "../models/UserDetailsModel.js";
 import { Cities } from "../models/Cities.js";
 import { Countries } from "../models/Countries.js";
 import { States } from "../models/States.js";
 import Schema from "mongoose";
 import { errors } from "./common.js";
+import { ApiLogs } from "../models/ApiLogs.js";
 
 dotenv.config();
 export const verifyToken = async (req, res, next) => {
@@ -233,4 +233,36 @@ export const societyValidator = async (society) => {
     error,
     isValid: Object.keys(error).length === 0,
   };
+};
+
+export const noticeValidator = async (notice) => {
+  const error = {};
+  if (!notice.description) error.description = "Description is required";
+  if (!notice.type) error.type = "Type is required";
+  if (!notice.societyId) error.societyId ="Society is required";
+  if (notice.type == NOTICE_BLOCK_WISE && notice.houseNumber.length > 0) error.houseNumber = "House Number is required";
+  if (notice.type == NOTICE_BLOCK_WISE && notice.houseNumber.length > 0) {
+    notice.houseNumber.forEach( async (houseNumber) => {
+      const house = await HouseMst.findOne({
+        _id: Schema.Types.ObjectId.createFromHexString(houseNumber),
+      });
+      if (!house) error.houseNumber = "House Number is not found";
+    });
+  }
+  return {
+    error,
+    isValid: Object.keys(error).length === 0,
+  }
+};
+
+export const createLogger = async (req, res, next) => {
+  const logger = new ApiLogs({
+    method: req.method,
+    url: req.url,
+    headers: JSON.stringify(req.headers),
+    body: JSON.stringify(req.body),
+    query: JSON.stringify(req.query),
+  });
+  await logger.save();
+  next();
 };

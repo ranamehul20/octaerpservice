@@ -40,3 +40,30 @@ export const checkAuthentication = async (req, res) => {
     throw err;
   }
 };
+
+export const forgotPassword = async (email) => {
+  try {
+    const response = await axios.post(
+      `${apiUrl}/auth/forgot-password`,
+      { email: email },
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const resetPassword = async (token, password) => {
+  try {
+    const response = await axios.post(
+      `${apiUrl}/auth/reset-password/${token}`,
+      { password: password },
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+};
+

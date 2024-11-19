@@ -41,6 +41,11 @@ const Login = () => {
     }
   },[isAuthenticated]);
   
+  const handleForgotPassword = () => {
+    // Redirect to the Forgot Password page
+    navigate('/forgot-password');
+  };
+
   // API call to login
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -48,6 +53,7 @@ const Login = () => {
     const response = await loginService(email, password);
     if(response.code ===200 && !response.error) {
       setLoading(false);
+      sessionStorage.setItem('userId',response.results.user._id);
       // Perform login, set the token in the HTTP-only cookie on the server side
       navigate('/dashboard');
     }else{
@@ -100,7 +106,7 @@ const Login = () => {
                         </CButton>
                       </CCol>
                       <CCol xs={6} className="text-right">
-                        <CButton color="link" className="px-0">
+                        <CButton color="link" className="px-0" onClick={handleForgotPassword}>
                           Forgot password?
                         </CButton>
                       </CCol>

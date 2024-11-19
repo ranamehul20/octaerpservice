@@ -1,18 +1,20 @@
 import express from "express";
-import {verifyToken} from "../utils/validator.js";
-import { Register,Login, Logout,Check,AdminLogin,ListMembers,TestEmails, ChangePassword } from "../controllers/UserController.js";
+import {verifyToken,createLogger} from "../utils/validator.js";
+import { Register,Login, Logout,Check,AdminLogin,ListMembers,TestEmails, ChangePassword,forgotPassword,resetPassword } from "../controllers/UserController.js";
 const router = express.Router();
 
 
-router.post('/register',verifyToken,Register);
-router.post('/admin',Register);
-router.post('/login',Login);
-router.post('/adminlogin',AdminLogin);
-router.post('/logout',Logout);
-router.get('/check',Check);
-router.get('/',verifyToken,ListMembers);
+router.post('/register',[verifyToken,createLogger],Register);
+router.post('/admin',createLogger,Register);
+router.post('/login',createLogger,Login);
+router.post('/adminlogin',createLogger,AdminLogin);
+router.post('/logout',createLogger,Logout);
+router.get('/check',createLogger,Check);
+router.get('/',[verifyToken,createLogger],ListMembers);
 router.get('/testmail',TestEmails);
-router.post('/changepassword',verifyToken,ChangePassword);
+router.post('/change-password',[verifyToken,createLogger],ChangePassword);
+router.post('/forgot-password',createLogger,forgotPassword);
+router.post('/reset-password/:token',createLogger,resetPassword)
 
 
 

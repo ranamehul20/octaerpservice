@@ -42,3 +42,22 @@ export const sendWelcomeEmail = async (userEmail, password) => {
     throw error; // Rethrow the error if you want to handle it later
   }
 };
+
+
+// sendEmail
+export const sendEmail = async (to, subject, text) => {
+  const mailOptions = {
+    from: `"Octa ERP Service" <${smtpUsername}>`,
+    to,
+    subject,
+    text,
+  };
+  try {
+  const info = await transporter.sendMail(mailOptions);
+  console.log('Email sent: ' + info.response);
+  return info; // You can return the info if you need to use it later
+} catch (error) {
+  console.error('Error sending email:', error);
+  throw error; // Rethrow the error if you want to handle it later
+}
+};

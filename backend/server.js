@@ -9,6 +9,7 @@ import BlockRoutes from "./routes/BlockRoutes.js";
 import HouseRoutes from "./routes/HouseRoutes.js";
 import MemberRoutes from "./routes/MemberRoutes.js";
 import MaintenanceRoute from "./routes/MaintenanceRoutes.js";
+import NoticeRoutes from "./routes/NoticeRoutes.js";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from 'morgan';
@@ -62,6 +63,8 @@ app.use("/api/blocks", BlockRoutes);
 app.use("/api/config",SettingRoutes);
 app.use("/api/members",MemberRoutes);
 app.use("/api/maintenance",MaintenanceRoute);
+app.use("/api/notices",NoticeRoutes);
+
 // Handle React routing, return index.html file from the build
 // app.get('*', (req, res) => {
 //     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));

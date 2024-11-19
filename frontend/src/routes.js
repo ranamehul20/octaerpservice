@@ -2,6 +2,7 @@ import React from 'react'
 import MemberListView from './views/pages/member/MemberListView'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
+const Profile = React.lazy(() => import('./views/dashboard/Profile'))
 const SocietyListView = React.lazy(() => import('./views/pages/society/SocietyListView'))
 const createSociety = React.lazy(() => import('./views/pages/society/SocietyCreate'))
 const updateSociety = React.lazy(() => import('./views/pages/society/SocietyUpdate'))
@@ -22,6 +23,7 @@ const memberDetails = React.lazy(() => import('./views/pages/member/MemberDetail
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/profile', name: 'Profile', element: Profile},
   { path: '/society', name: 'Society', element:SocietyListView},
   { path: '/society/create', name: 'Society Create', element:createSociety},
   { path: '/society/edit/:id', name: 'Society Update', element:updateSociety},

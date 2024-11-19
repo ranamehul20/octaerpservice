@@ -162,6 +162,20 @@ export const updateHouses = async (req, res, next) => {
       res.status(422).json(validation("This house already exist"));
       return next();
     }
+
+    const originalData = await HouseMst.findOne({ _id:req.params.id});
+    // Save the original and updated values in the change log
+    const log = new ChangeLog({
+     method: req.method,
+     collectionName: 'HouseMst',
+     url: req.url,
+     originalData: originalData.toObject(),
+     updatedData: data
+   });
+
+   await log.save();
+   console.log("Change log saved successfully");
+
     const house = await HouseMst.findByIdAndUpdate(req.params.id, {
       $set: {
         name: data.name,

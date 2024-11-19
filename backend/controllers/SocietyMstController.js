@@ -105,6 +105,19 @@ export const updateSociety = async (req, res, next) => {
   const data = req.body;
   try {
     console.log(data);
+    const originalData = await SocietyMst.findOne({ _id:req.params.id});
+    // Save the original and updated values in the change log
+    const log = new ChangeLog({
+     method: req.method,
+     collectionName: 'SocietyMst',
+     url: req.url,
+     originalData: originalData.toObject(),
+     updatedData: data
+   });
+
+   await log.save();
+   console.log("Change log saved successfully");
+   
     const society = await SocietyMst.findByIdAndUpdate(req.params.id, {
       $set: {
         name: data.name,
