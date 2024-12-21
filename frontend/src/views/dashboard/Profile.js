@@ -7,7 +7,7 @@ import { viewRequest } from '../../services/MemberService';
 const Profile = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const [member, setMember] = useState(null);
+  const [member, setMember] = useState({firstname:"",lastname:"",email:"",phoneNumber:"",houseName:"",blockName:"",societyName:"",roleName:""});
   const id = sessionStorage.getItem('userId');
 // Fetch society details from the backend API
 const fetchMemberDetails = async () => {
@@ -19,10 +19,8 @@ const fetchMemberDetails = async () => {
   }
 };
   useEffect(() => {
-    
-
     fetchMemberDetails();
-  }, []);
+  },[]);
   return (
     <CRow>
       <CCol xs="12" md="8" className="offset-md-2">
@@ -35,9 +33,7 @@ const fetchMemberDetails = async () => {
             <p><strong>Name:</strong> {member.name}</p>
             <p><strong>Email:</strong> {member.email} </p>
             <p><strong>Phone Number:</strong> {member.phoneNumber} </p>
-            <p><strong>House Number :</strong> {member.houseName} </p>
-            <p><strong>Block:</strong> {member.blockName} </p>
-            <p><strong>Society:</strong> {member.societyName} </p>
+            <p><strong>Date of Birth:</strong> {member.dateOfBirth} </p>
             <p><strong>Type:</strong> {member.roleName} </p>
           </CCardBody>
         </CCard>

@@ -6,6 +6,8 @@ const UserSchema = new Schema({
     password: { type: String, required: true },
     role: {type: Number, required:true},
     isDefaultPassword: {type:Boolean, required:false, default:true},
+    activeDevice: {type: String, required:false, trim: true},
+    fcmToken: {type: String, required:false, trim: true},
     isDeleted: {type:Boolean, required:false, default:false},
     createdBy: {type:ObjectId, required:false},
     updatedBy: {type:ObjectId, required:false}

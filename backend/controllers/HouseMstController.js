@@ -62,56 +62,59 @@ export const createHouse = async (req, res, next) => {
 // House Listing Method
 export const listingHouses = async (req, res, next) => {
   try {
+    const { page = 1, limit = 10 } = req.query; // Default pagination values
+
     if (req.user.isAdmin) {
+      // const totalCount = await HouseMst.countDocuments();
       const houseDetails = await HouseMst.find()
         .populate("societyId")
         .populate("blockId")
         .populate("createdBy", "name");
-      if (houseDetails) {
-        const house = [];
-        houseDetails.forEach((item) => {
-          house.push({
-            _id: item._id,
-            name: item.name,
-            type: item.type,
-            block: item.blockId.name ?? "",
-            society: item.societyId.name ?? "",
-          });
-        });
-        res
-          .status(200)
-          .json(success("Houses fetched successfully", house, res.statusCode));
-        return next();
-      }
-      res
-        .status(500)
-        .json(
-          errors("Some error occurred while fetching houses", res.statusCode)
+        // .skip((page - 1) * limit)
+        // .limit(parseInt(limit));
+
+      if (houseDetails.length) {
+        const houses = houseDetails.map((item) => ({
+          _id: item._id,
+          name: item.name,
+          type: item.type,
+          block: item.blockId?.name ?? "",
+          society: item.societyId?.name ?? "",
+        }));
+
+        return res.status(200).json(
+          success("Houses fetched successfully", houses, res.statusCode)
         );
-      return next();
+      }
+      return res.status(404).json(errors("No houses found", res.statusCode));
     }
+
+    // Non-admin fetching houses by blockId
+    const totalCount = await HouseMst.countDocuments({
+      blockId: req.query.blockId,
+    });
     const houses = await HouseMst.find({
-      blockId: Schema.Types.ObjectId.createFromHexString(req.query.blockId),
+      blockId: req.query.blockId,
     })
       .populate("societyId")
       .populate("blockId")
-      .populate("createdBy", "name");
-    if (houses) {
-      // await session.commitTransaction();
-      res
-        .status(200)
-        .json(success("Houses fetched successfully", houses, res.statusCode));
-      return next();
-    }
-    res
-      .status(500)
-      .json(
-        errors("Some error occurred while fetching houses", res.statusCode)
+      .populate("createdBy", "name")
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    if (houses.length) {
+      return res.status(200).json(
+        success("Houses fetched successfully", {
+          totalCount,
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(totalCount / limit),
+          houses,
+        }, res.statusCode)
       );
-    return next();
+    }
+    return res.status(404).json(errors("No houses found", res.statusCode));
   } catch (error) {
     res.status(500).json(errors(error.message, res.statusCode));
-    // await session.abortTransaction();
     next(error);
   }
 };

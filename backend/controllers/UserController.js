@@ -9,7 +9,6 @@ import { BlockMst } from "../models/BlockMst.js";
 import { SUPER_ADMIN,CHAIRMEN } from "../utils/constants.js";
 import Schema from "mongoose";
 import {sendEmail} from "../utils/mailConfig.js";
-import { DeviceMst } from "../models/DeviceMst.js";
 
 // register method
 export const Register = async (req, res, next) => {
@@ -112,17 +111,14 @@ export const Login = async (req, res, next) => {
       return res.status(400).json(errors("wrong password", res.statusCode));
     const details = await UserDetails.findOne({ userId: user._id });
     if(req.body.deviceId){
-      const device = await DeviceMst.findOne({ deviceId:req.body.deviceId });
-      if(!device){
-        const deviceModel = new DeviceMst({
-          deviceId: req.body.deviceId,
-          userId: user._id,
-          blockNumber: details.blockNumber,
-          societyId: details.societyId,
-          houseNumber: details.houseNumber
-        });
-        await deviceModel.save();
-      } 
+      if(user.activeDevice && user.activeDevice != null && user.activeDevice != ''){
+        if(user.activeDevice != req.body.deviceId){
+          return res.status(400).json(errors("This device is already registered to another user", res.statusCode));
+        }
+      }
+      user.activeDevice=req.body.deviceId;
+      user.fcmToken=req.body.fcmToken;
+      await user.save(); 
     }
     const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
@@ -188,6 +184,7 @@ export const AdminLogin = async (req, res, next) => {
       return res
         .status(400)
         .json(errors("This user doesn’t exist", res.statusCode));
+    user.save();
     const isMatch = await user.matchPassword(req.body.password);
     if (!isMatch)
       return res.status(400).json(errors("wrong password", res.statusCode));
@@ -246,6 +243,8 @@ export const Check = async (req, res, next) => {
     const accessToken = cookieObj.accessToken ? cookieObj.accessToken.split("=")[1].split(";")[0] : "";
     const refreshToken = cookieObj.refreshToken ? cookieObj.refreshToken.split("=")[1].split(";")[0] : "";
     if (!accessToken && !refreshToken) {
+      const result = await clearDevice(req);
+      console.log("device clear {}",result.success);
       res.status(401).json(errors("Unauthorized", res.statusCode));
       return next();
     }
@@ -262,8 +261,14 @@ export const Check = async (req, res, next) => {
           .status(403)
           .json(errors("Token is not valid!", res.statusCode));
       }
+      const userDetails = await User.findOne({
+        _id: Schema.Types.ObjectId.createFromHexString(decoded.id),
+      });
+      if (!userDetails){
+        return res.status(404).json(errors("User not found!", res.statusCode));
+      }
       const accessToken = await jwt.sign(
-        { id: decoded.id },
+        { id: decoded.id},
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN }
       );
@@ -295,14 +300,17 @@ export const Check = async (req, res, next) => {
 // logout method
 export const Logout = async (req, res, next) => {
   try {
-    const authHeader = req.headers.cookie;
-
-    const jwt = authHeader.split("=")[1];
-
-    if (!jwt) {
-      return res.status(401).json(errors("Unauthorized", res.statusCode));
+    console.log(req.body.email);
+    const user = await User.findBy_email(req.body.email);
+    if (!user) {
+      // Throw an error to handle it centrally
+      return res.status(500).json(errors("User not found", res.statusCode));
     }
-    res.clearCookie('accessToken',{
+    // Clear the active device field
+    user.activeDevice = '';
+    await user.save();
+    // Clear the access token cookie
+    res.cookie('accessToken', '', {
       httpOnly: true,
       withCredentials: true,
       secure: process.env.NODE_ENV === "production",
@@ -310,8 +318,9 @@ export const Logout = async (req, res, next) => {
       maxAge: 60 * 60 * 24 * 30,
       path: "/",
     });
-    
-    res.clearCookie('refreshToken', {
+
+    // Clear the refresh token cookie
+    res.cookie('refreshToken', '', {
       httpOnly: true,
       withCredentials: true,
       secure: process.env.NODE_ENV === "production",
@@ -519,38 +528,36 @@ export const UpdateDetails = async (req, res, next) => {
 export const GetUserDetails = async (req, res, next) => {
   try {
     console.log("GetUserDetails");
-    const user = await UserDetails.find({userId:req.params.id}).populate('userId').populate('blockNumber').populate('houseNumber').populate('societyId');
+    const user = await UserDetails.findOne({userId:req.params.id}).populate('userId').populate('blockNumber').populate('houseNumber').populate('societyId');
     if (!user) {
       return res
         .status(404)
         .json(errors("User not found", res.statusCode));
     }
-    let userDetails= null;
-    user.forEach((item) => {
-      userDetails={
-        _id: item.userId._id,
-        firstname: item.firstName,
-        lastname: item.lastName,
-        email: item.userId.email,
-        role: item.userId.role,
-        roleName: item.userId.role == process.env.SUPER_ADMIN ? 'Super Admin' : item.userId.role == process.env.CHAIRMEN ? 'Chairman' : item.userId.role == process.env.MEMBERS ? 'House Owner' : 'TENANT',
-        phoneNumber: item.phoneNumber,
-        dateOfBirth: dateConverter(item.dateOfBirth),
-        street: item.street,
-        locality: item.locality,
-        city: item.city,
-        state: item.state,
-        country: item.country,
-        zipCode: item.zipCode,
-        societyId:item.societyId._id,
-        societyName: item.societyId.name,
-        blockNumber:item.blockNumber._id,
-        blockName:item.blockNumber.name,
-        houseNumber:item.houseNumber._id,
-        houseName:item.houseNumber.name,
-        totalMembers:item.totalMembers,
-      };
-    });
+    console.log(user);
+    let userDetails= {
+      _id: user.userId._id,
+      firstname: user.firstName,
+      lastname: user.lastName,
+      email: user.userId.email,
+      role: user.userId.role,
+      roleName: user.userId.role == process.env.SUPER_ADMIN ? 'Super Admin' : user.userId.role == process.env.CHAIRMEN ? 'Chairman' : user.userId.role == process.env.MEMBERS ? 'House Owner' : 'TENANT',
+      phoneNumber: user.phoneNumber,
+      dateOfBirth: user.dateOfBirth ? dateConverter(user.dateOfBirth) : "",
+      street: user.street,
+      locality: user.locality,
+      city: user.city,
+      state: user.state,
+      country: user.country,
+      zipCode: user.zipCode,
+      societyId: user.societyId ? user.societyId._id : '',
+      societyName: user.societyId ? user.societyId.name : '',
+      blockNumber: user.blockNumber ? user.blockNumber._id : '',
+      blockName: user.blockNumber ? user.blockNumber.name : '',
+      houseNumber: user.houseNumber ? user.houseNumber._id : '',
+      houseName: user.houseNumber ? user.houseNumber.name : '',
+      totalMembers:user.totalMembers,
+    };
     res.status(200).json(success("User details fetched successfully", userDetails, res.statusCode));
   } catch (error) {
     res.status(500).json(errors(error.message, res.statusCode));
@@ -607,3 +614,23 @@ export const resetPassword = async (req, res, next) => {
   }
 };
 
+const clearDevice = async (req) => {
+  try {
+    // Find user by email
+    const user = await User.findBy_email(req.email);
+    
+    if (!user) {
+      // Throw an error to handle it centrally
+      throw new Error("User not found");
+    }
+
+    // Clear the active device field
+    user.activeDevice = '';
+    await user.save();
+
+    return { success: true, message: "Device cleared successfully" };
+  } catch (error) {
+    // Return error details for centralized error handling
+    return { success: false, message: error.message };
+  }
+};

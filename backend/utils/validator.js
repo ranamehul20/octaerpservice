@@ -18,7 +18,6 @@ export const verifyToken = async (req, res, next) => {
   const cookies = req.headers.cookie;
   console.log("cookies", cookies);
   const cookieObj = {};
-
   cookies && cookies.split(';').forEach(cookie => {
     const [name, value] = cookie.split('=').map(c => c.trim());
     cookieObj[name] = decodeURIComponent(value);
@@ -46,8 +45,17 @@ export const verifyToken = async (req, res, next) => {
             .status(403)
             .json(errors("Token is not valid!", res.statusCode));
         }
+        const userDetails = await User.findOne({
+          _id: Schema.Types.ObjectId.createFromHexString(decoded.id),
+        });
+        if (!userDetails)
+          return res.status(404).json(errors("User not found!", res.statusCode));
+        req.user = userDetails;
+        if (userDetails.role == SUPER_ADMIN){
+          req.user["isAdmin"] = true;
+        }
         const accessToken = await jwt.sign(
-          { id: decoded.id },
+          { id: decoded.id},
           process.env.JWT_SECRET,
           { expiresIn: process.env.JWT_EXPIRES_IN }
         );
@@ -60,17 +68,6 @@ export const verifyToken = async (req, res, next) => {
           path: "/",
         });
         res.cookie("accessToken", authSerialized);
-        const userDetails = await User.findOne({
-          _id: Schema.Types.ObjectId.createFromHexString(decoded.id),
-        });
-        if (!userDetails)
-          return res
-            .status(404)
-            .json(errors("User not found!", res.statusCode));
-        req.user = userDetails;
-        if (userDetails.role == SUPER_ADMIN){
-          req.user["isAdmin"] = true;
-        }
         next();
       } catch (error) {
         return res.status(400).send("Invalid Token.");
@@ -237,16 +234,16 @@ export const societyValidator = async (society) => {
 
 export const noticeValidator = async (notice) => {
   const error = {};
+  if (!notice.title) error.title = "Title is required";
   if (!notice.description) error.description = "Description is required";
-  if (!notice.type) error.type = "Type is required";
+  if (!notice.category) error.category = "Category is required";
   if (!notice.societyId) error.societyId ="Society is required";
-  if (notice.type == NOTICE_BLOCK_WISE && notice.houseNumber.length > 0) error.houseNumber = "House Number is required";
-  if (notice.type == NOTICE_BLOCK_WISE && notice.houseNumber.length > 0) {
-    notice.houseNumber.forEach( async (houseNumber) => {
-      const house = await HouseMst.findOne({
-        _id: Schema.Types.ObjectId.createFromHexString(houseNumber),
+  if (notice.blockId  && notice.blockId.length > 0) {
+    notice.blockId.forEach( async (block) => {
+      const blocks = await BlockMst.findOne({
+        _id: Schema.Types.ObjectId.createFromHexString(block),
       });
-      if (!house) error.houseNumber = "House Number is not found";
+      if (!blocks) error.blocks = "Block is not found";
     });
   }
   return {

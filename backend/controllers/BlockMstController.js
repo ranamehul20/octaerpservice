@@ -57,53 +57,61 @@ export const createBlock = async (req, res, next) => {
 // Block Listing Method
 export const listingBlocks = async (req, res, next) => {
   try {
-    if(req.user.isAdmin){
-      let query = {};
-      if(req.query.societyId){
-        query.societyId = Schema.Types.ObjectId.createFromHexString(req.query.societyId);
-      }
-      const blockDetails = await BlockMst.find(query).populate('societyId')
-       .populate('createdBy','name');
-      if (blockDetails) {
-        // await session.commitTransaction();
-        const block=[];
-        blockDetails.forEach(item => {
-        block.push({
+    const { page = 1, limit = 10 } = req.query; // Default pagination values
+    const query = {};
+
+    if (req.query.societyId) {
+      query.societyId = Schema.Types.ObjectId.createFromHexString(req.query.societyId);
+    }
+
+    if (req.user.isAdmin) {
+      // const totalCount = await BlockMst.countDocuments(query);
+      const blockDetails = await BlockMst.find(query)
+        .populate("societyId")
+        .populate("createdBy", "name");
+        // .skip((page - 1) * limit)
+        // .limit(parseInt(limit));
+
+      if (blockDetails.length) {
+        const blocks = blockDetails.map((item) => ({
           _id: item._id,
           name: item.name,
-          society: item.societyId.name,
-        });
-      });
-        res
-         .status(200)
-         .json(success("Blocks fetched successfully",block, res.statusCode));
-        return next();
-      }
-      res
-       .status(500)
-       .json(
-          errors("Some error occurred while fetching blocks", res.statusCode)
+          society: item.societyId?.name ?? "",
+        }));
+
+        return res.status(200).json(
+          success("Blocks fetched successfully",blocks, res.statusCode)
         );
-      return next();
+      }
+
+      return res.status(404).json(errors("No blocks found", res.statusCode));
     }
-    const blocks = await BlockMst.find({societyId: Schema.Types.ObjectId.createFromHexString(req.query.societyId)})
-     .populate('createdBy','name');
-    if (blocks) {
-      // await session.commitTransaction();
-      res
-       .status(200)
-       .json(success("Blocks fetched successfully",blocks, res.statusCode));
-      return next();
+
+    // Non-admin fetching blocks by societyId
+    if (!req.query.societyId) {
+      return res.status(400).json(errors("societyId is required", res.statusCode));
     }
-    res
-     .status(500)
-     .json(
-        errors("Some error occurred while fetching blocks", res.statusCode)
+
+    const totalCount = await BlockMst.countDocuments(query);
+    const blocks = await BlockMst.find(query)
+      .populate("createdBy", "name")
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    if (blocks.length) {
+      return res.status(200).json(
+        success("Blocks fetched successfully", {
+          totalCount,
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(totalCount / limit),
+          blocks,
+        }, res.statusCode)
       );
-    return next();
+    }
+
+    return res.status(404).json(errors("No blocks found", res.statusCode));
   } catch (error) {
     res.status(500).json(errors(error.message, res.statusCode));
-    // await session.abortTransaction();
     next(error);
   }
 };

@@ -1,11 +1,12 @@
 import { Schema, model,ObjectId,Date } from "mongoose";
 
 const NoticeMstSchema = new Schema({
+    title: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
-    type: { type: Number, required: false, default:1, trim: true },
-    status: { type: String, required: true, trim: true },
+    category: { type: Number, required: true, default:1},
     societyId: { type: String, ref: 'SocietyMst', required:true},
-    houseNumber: { type: Map, ref: 'BlockMst', required:true},
+    status: { type: Number, required: false, default:1},
+    blockId: { type: Map, ref: 'BlockMst', required:true},
     createdBy: {type:ObjectId,ref: 'User', required:false},
     updatedBy: {type:ObjectId,ref: 'User', required:false}
 },{
