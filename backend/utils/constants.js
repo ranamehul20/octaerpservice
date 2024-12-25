@@ -1,0 +1,16 @@
+export const SUPER_ADMIN = 1;
+export const CHAIRMEN = 2;
+export const MEMBER = 3;
+export const TENANT = 4;
+export const WELCOME_TITLE_EMAIL = "Welcome to Octa ERP Service";
+export const WELCOME_MESSAGE_EMAIL = "Hi! Thank you for registering. Your password is:";
+export const NOTICE_DEFAULT=1;
+export const NOTICE_BLOCK_WISE = 2;
+export const NOTICE_STATUS_PENDING = "pending";
+export const NOTICE_STATUS_SENT = "sent";
+export const NOTICE_GENERAL=1;
+export const NOTICE_MAINTENANCE_DUE=2;
+export const NOTICE_POLICY_AND_RULE_CHANGES=3;
+export const NOTICE_EVENT=4;
+export const NOTICE_WORK_OR_MAINTENANCE_ACTIVITY=5;
+export const NOTICE_VIOLATION=6;
