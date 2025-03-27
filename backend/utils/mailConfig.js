@@ -43,6 +43,25 @@ export const sendWelcomeEmail = async (userEmail, password) => {
   }
 };
 
+export const sendMaintainceDueEmail = async (email,name, dueDate) => {
+  const mailOptions = {
+    from: `"Octa ERP Service" <${smtpUsername}>`,           // Sender address
+    to: email,                                 // Recipient email
+    subject: 'Maintenance Due Reminder',        // Subject
+    text: `Dear ${name},\n\nThis is a reminder that your maintenance dues are due on ${dueDate}.\n\nPlease ensure timely payment.\n\nThank you!`,
+    html: `<p>Dear <strong>${name}</strong> ,\n\nThis is a reminder that your maintenance dues are due on ${dueDate}.\n\nPlease ensure timely payment.\n\nThank you!</p>`,
+  };
+  try {
+    // Wait for the email to be sent
+    const info = await transporter.sendMail(mailOptions);
+    
+    console.log('Email sent: ' + info.response);
+    return info; // You can return the info if you need to use it later
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error; // Rethrow the error if you want to handle it later
+  }
+};
 
 // sendEmail
 export const sendEmail = async (to, subject, text) => {

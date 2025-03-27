@@ -19,7 +19,7 @@ const memberListView = React.lazy(() => import('./views/pages/member/MemberListV
 const createMember = React.lazy(() => import('./views/pages/member/MemberCreate'))
 const updateMember = React.lazy(() => import('./views/pages/member/MemberUpdate'))
 const memberDetails = React.lazy(() => import('./views/pages/member/MemberDetailsView'))
-
+ 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },

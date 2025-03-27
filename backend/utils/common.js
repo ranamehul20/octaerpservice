@@ -53,3 +53,16 @@ const date = new Date(data);
 const formattedDate = date.toISOString().split('T')[0];
 return formattedDate;
 };
+
+export const maintainanceAmount = (maintainance) => {
+  let total = maintainance.maintenanceConfig.maintenanceAmount;
+  if(maintainance.maintenanceConfig.gstApplicable && maintainance.maintenanceConfig.gstApplicable=='yes'){
+    let gstAmount = (total*maintainance.maintenanceConfig.gstPercentage)/100;
+    total+=gstAmount;
+  }
+  if(maintainance.status=='overdue'){
+    total+=maintainance.penalty;
+  }
+
+  return total;
+};

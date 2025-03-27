@@ -208,6 +208,9 @@ export const blockValidator = async (block) => {
 
 export const societyValidator = async (society) => {
   const error = {};
+  if (!society.contactName) error.contactName = "Contact person name is required";
+  if (!society.contactEmail) error.contactEmail = "Contact person email is required";
+  if (!society.contactPhone) error.contactPhone = "Contact person phone is required";
   if (!society.name) error.name = "Society name is required";
   if (!society.street) error.street = "Address Line 1 is required";
   if (!society.locality) error.locality = "Locality is required";

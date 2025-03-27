@@ -4,6 +4,7 @@ const UserDetailsSchema = new Schema({
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
     phoneNumber: { type: String, required: false },
+    alternativePhoneNumber: { type: String, required: false },
     dateOfBirth: { type: Date, required: false},
     blockNumber: { type: ObjectId, ref: 'BlockMst', required: false},
     houseNumber: { type: ObjectId, ref: 'HouseMst', required: false},

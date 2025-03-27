@@ -117,5 +117,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .env
+octa-society-firebase-adminsdk-qsa1p-a8f2732f75.json
+uploads/
+
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node

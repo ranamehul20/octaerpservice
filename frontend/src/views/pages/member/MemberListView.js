@@ -29,7 +29,7 @@ const MemberListView = () => {
     try {
       const response = await listRequest();
       if (response.code === 200 && !response.error) {
-        setMembers(Array.isArray(response.results) ? response.results : []);
+        setMembers(Array.isArray(response.results.user) ? response.results.user : []);
       } else {
         setError("Failed to fetch members. Please try again later.");
       }
@@ -99,7 +99,7 @@ const MemberListView = () => {
     },
     {
       name: "Name",
-      selector: (row) => `${row.firstname} ${row.lastname}`,
+      selector: (row) => `${row.firstName} ${row.lastName}`,
       sortable: true,
     },
     {

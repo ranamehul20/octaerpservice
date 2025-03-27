@@ -6,6 +6,7 @@
 * Copyright (c) 2024 creativeLabs Łukasz Holeczek
 * Licensed under MIT (https://github.com/coreui/coreui-free-react-admin-template/blob/main/LICENSE)
 -->
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -16,14 +17,21 @@
     <meta name="keyword" content="Octa,octaerpservice,service,erp,society,flat,tenament">
     <title>Octa Erp Service</title>
     <link rel="manifest" href="/manifest.json">
-    <link rel="shortcut icon" href="/dist/assets/favicon/favicon.ico">
+    <link rel="shortcut icon" href="/dist/assets/favicon/favicon.ico" alt="Octa Erp Service Logo">
+    <script 
+      src="https://checkout.razorpay.com/v1/checkout.js" 
+      async 
+      integrity="sha384-...hash..." 
+      crossorigin="anonymous">
+    </script>
   </head>
   <body>
     <noscript>
-      You need to enable JavaScript to run this app
+      <p>JavaScript is disabled in your browser. Please enable it to use the application.</p>
     </noscript>
-    <div id="root"></div>
-    <script type="module" src="/src/index.js"></script>
-    <!-- built files will be auto injected -->
+    <div id="root">
+      <p>Loading application...</p>
+    </div>
+    <script type="module" src="/src/index.js" defer></script>
   </body>
 </html>

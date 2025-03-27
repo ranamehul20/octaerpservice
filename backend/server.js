@@ -11,6 +11,9 @@ import MemberRoutes from "./routes/MemberRoutes.js";
 import MaintenanceRoute from "./routes/MaintenanceRoutes.js";
 import NoticeRoutes from "./routes/NoticeRoutes.js";
 import NotificationRoutes from "./routes/NotificationRoutes.js"; 
+import SupportRoutes from "./routes/SupportRoutes.js";
+import FeedbackRoutes from "./routes/FeedbackRoutes.js";
+import PaymentRoutes from "./routes/PaymentRoutes.js";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from 'morgan';
@@ -18,7 +21,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import winston  from 'winston';
 import cookieParser from 'cookie-parser';
-import {runTask} from './scheduler/maintenanceScheduler.js';
+import { runTask } from './scheduler/maintenanceScheduler.js';
+import { Feedback } from './models/Feedback.js';
 
 const PORT  = process.env.PORT || 3001 ;
 const app = express();
@@ -67,6 +71,9 @@ app.use("/api/maintenance",MaintenanceRoute);
 app.use("/api/notices",NoticeRoutes);
 app.use("/api/notification",NotificationRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/support",SupportRoutes);
+app.use("/api/feedback",FeedbackRoutes);
+app.use("/api/payment",PaymentRoutes);
 
 // Handle React routing, return index.html file from the build
 // app.get('*', (req, res) => {

@@ -4,11 +4,39 @@ import { ChangeLogs } from "../models/ChangeLogs.js";
 
 export const list = async (req, res) => {
     try {
-      const { page = 1, limit = 10 } = req.query;
-      const totalCount = await Notification.countDocuments({
+      const { page = 1, limit = 10,searchText,title,description, startDate, endDate } = req.query;
+      const filters = {
         userId: req.user._id
-      });
-      const notifications = await Notification.find({ userId: req.user._id })
+      };
+
+      if (description) {
+        filters.description = { $regex: description, $options: "i" }
+      }
+  
+      if (title) {
+        filters.title = { $regex: title, $options: "i" }
+      }
+  
+      if(searchText){
+        filters["$or"] = [
+          { title: { $regex: req.query.name, $options: "i" } },
+          { description: { $regex: req.query.name, $options: "i" } },
+        ];
+      }
+
+      // Add date range filter if provided
+    if (startDate || endDate) {
+      filters.createdAt = {};
+      if (startDate) {
+        filters.createdAt.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        filters.createdAt.$lte = new Date(endDate);
+      }
+    }
+
+      const totalCount = await Notification.countDocuments(filters);
+      const notifications = await Notification.find(filters)
         .populate("userId")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)

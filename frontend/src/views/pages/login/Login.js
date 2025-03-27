@@ -1,5 +1,5 @@
-import React,{ useState,useEffect } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CButton,
   CCard,
@@ -12,55 +12,58 @@ import {
   CInputGroup,
   CInputGroupText,
   CRow,
-  CAlert
-} from '@coreui/react';
-import CIcon from '@coreui/icons-react';
-import { cilLockLocked, cilUser  } from '@coreui/icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios';
-import { useAuth } from '../../../AuthContext';
+  CAlert,
+} from "@coreui/react";
+import CIcon from "@coreui/icons-react";
+import { cilLockLocked, cilUser } from "@coreui/icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { useAuth } from "../../../AuthContext";
 import { loginService } from "../../../services/AuthService";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); 
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);  // Toggle the showPassword state
-  };
-  const { isAuthenticated } = useAuth();
-  useEffect(() => {
-    console.log("login",isAuthenticated);
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  },[isAuthenticated]);
-  
-  const handleForgotPassword = () => {
-    // Redirect to the Forgot Password page
-    navigate('/forgot-password');
+    setShowPassword(!showPassword);
   };
 
-  // API call to login
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleForgotPassword = () => {
+    navigate("/forgot-password");
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const response = await loginService(email, password);
-    if(response.code ===200 && !response.error) {
-      setLoading(false);
-      sessionStorage.setItem('userId',response.results.user._id);
-      // Perform login, set the token in the HTTP-only cookie on the server side
-      navigate('/dashboard');
-    }else{
-      setError(response.message);
+    setError(""); // Reset the error message
+    try {
+      const response = await loginService(email, password);
+      if (response.code === 200 && !response.error) {
+        sessionStorage.setItem("userId", response.results.user._id);
+        navigate("/dashboard");
+      } else {
+        setError(response.message || "Invalid credentials");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Login error:", err);
+    } finally {
       setLoading(false);
     }
   };
+
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -77,36 +80,58 @@ const Login = () => {
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput  type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Email"
-                      required autoComplete="email" />
+                      <CFormInput
+                        type="email"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          setError(""); // Clear error on input
+                        }}
+                        placeholder="Email"
+                        required
+                        autoComplete="email"
+                      />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
                         <CIcon icon={cilLockLocked} />
                       </CInputGroupText>
                       <CFormInput
-                        type={showPassword ? 'text' : 'password'}
+                        type={showPassword ? "text" : "password"}
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          setError(""); // Clear error on input
+                        }}
                         placeholder="Password"
                         required
                         autoComplete="current-password"
                       />
-                      <CInputGroupText onClick={togglePasswordVisibility} style={{ cursor: 'pointer' }}>
-                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} /> {/* Using FontAwesome icon */}
+                      <CInputGroupText
+                        onClick={togglePasswordVisibility}
+                        style={{ cursor: "pointer" }}
+                        aria-label="Toggle password visibility"
+                      >
+                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                       </CInputGroupText>
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton type="submit" color="primary" className="px-4">
-                          Login
+                        <CButton
+                          type="submit"
+                          color="primary"
+                          className="px-4"
+                          disabled={loading}
+                        >
+                          {loading ? "Loading..." : "Login"}
                         </CButton>
                       </CCol>
                       <CCol xs={6} className="text-right">
-                        <CButton color="link" className="px-0" onClick={handleForgotPassword}>
+                        <CButton
+                          color="link"
+                          className="px-0"
+                          onClick={handleForgotPassword}
+                        >
                           Forgot password?
                         </CButton>
                       </CCol>
@@ -119,7 +144,7 @@ const Login = () => {
         </CRow>
       </CContainer>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

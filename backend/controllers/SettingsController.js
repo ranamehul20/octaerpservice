@@ -2,6 +2,8 @@ import { Countries } from "../models/Countries.js";
 import {States } from "../models/States.js";
 import { Cities } from "../models/Cities.js";
 import { SocietyMst } from "../models/SocietyMst.js";
+import { HouseMst } from "../models/HouseMst.js";
+import { BlockMst } from "../models/BlockMst.js";
 import { success, errors, validation } from "../utils/common.js";
 import {generateBills} from "../controllers/MaintenanceController.js";
 import { ChangeLogs } from "../models/ChangeLogs.js";
@@ -114,6 +116,49 @@ export const listingSociety = async (req, res) => {
     res.status(200).json(success("Society Fetched Successfully",societyListing,res.statusCode));
    }else {
     res.status(500).json(errors("No Society Found",res.statusCode));
+   }
+  } catch (error) { res.status(500).json(errors(error.message,res.statusCode)); }
+};
+
+export const listingBlocks = async (req, res) => {
+  try { 
+   const blocks = await BlockMst.find({ societyId: req.userDetails.societyId });
+   if(blocks) {
+    const blockListing = [];
+    blocks.forEach((item) => {
+      blockListing.push({
+        _id: item._id,
+        name: item.name
+      });
+    });
+    res.status(200).json(success("Blocks Fetched Successfully",blockListing,res.statusCode));
+   }else {
+    res.status(500).json(errors("No Block Found",res.statusCode));
+   }
+  } catch (error) { res.status(500).json(errors(error.message,res.statusCode)); }
+};
+
+
+export const listingHouse = async (req, res) => {
+  try { 
+   const blockIds = req.body.blockId; 
+   if (!blockIds || !Array.isArray(blockIds)) {
+    return res.status(400).json(errors("Invalid blockId format. It should be an array.", res.statusCode));
+    }
+   const houses = await HouseMst.find({ blockId: { $in: blockIds } }).populate("societyId").populate("blockId");
+   if(houses) {
+    const houseListing = [];
+    houses.forEach((item) => {
+      houseListing.push({
+        _id: item._id,
+        name: item.name,
+        blockName: item.blockId?.name ?? "",
+        blockId: item.blockId?._id ?? ""
+      });
+    });
+    res.status(200).json(success("Houses Fetched Successfully",houseListing,res.statusCode));
+   }else {
+    res.status(500).json(errors("No House Found",res.statusCode));
    }
   } catch (error) { res.status(500).json(errors(error.message,res.statusCode)); }
 };

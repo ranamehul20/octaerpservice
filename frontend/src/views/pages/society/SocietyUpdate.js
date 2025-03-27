@@ -41,6 +41,15 @@ const SocietyUpdate = () => {
     maintenanceFrequency: "",
     dueDay: "",
     latePaymentPenalty: "",
+    contactName: "",
+    contactEmail: "",
+    contactPhone: "",
+    bankName: "",
+    bankBranch: "",
+    bankAccountNumber: "",
+    bankIFSCCode: "",
+    gstApplicable: "no", // Default to no
+    gstPercentage: "",
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -53,7 +62,13 @@ const SocietyUpdate = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [logoFile, setLogoFile] = useState(null);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [showGstInput, setShowGstInput] = useState(false);
 
+  const handleGstChange = (e) => {
+    const value = e.target.value;
+    setFormData({ ...formData, gstApplicable: value });
+    setShowGstInput(value === "yes");
+  };
   // Function to fetch existing society details
   const fetchSocietyDetails = async () => {
     try {
@@ -61,6 +76,7 @@ const SocietyUpdate = () => {
       if (response.code === 200 && !response.error) {
         const data = response.results;
         const res = { ...data.settings, ...data };
+        console.log("res", res);
         setFormData(res);
         setSelectedCountry(data.country);
         setSelectedState(data.state);
@@ -433,6 +449,131 @@ const SocietyUpdate = () => {
               )}
             </CCardBody>
           </CCard>
+
+          <CCard className="mt-4">
+            <CCardHeader>Contact Person Details</CCardHeader>
+            <CCardBody>
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="contactName" className="col-sm-2 col-form-label">
+                  Name (As Per PAN)<span className="required-asterisk">*</span>
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="text"
+                    id="contactName"
+                    name="contactName"
+                    placeholder="Enter Contact Person Name"
+                    value={formData.contactName}
+                    onChange={handleChange}
+                    required
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="contactEmail" className="col-sm-2 col-form-label">
+                  Email Id<span className="required-asterisk">*</span>
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="email"
+                    id="contactEmail"
+                    name="contactEmail"
+                    placeholder="Enter Contact Person email"
+                    value={formData.contactEmail}
+                    onChange={handleChange}
+                    required
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="contactPhone" className="col-sm-2 col-form-label">
+                  Phone<span className="required-asterisk">*</span>
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="text"
+                    id="contactPhone"
+                    name="contactPhone"
+                    placeholder="Enter Contact Phone"
+                    value={formData.contactPhone}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </CCol>
+              </CRow>
+            </CCardBody>
+          </CCard>
+
+          <CCard className="mt-4">
+            <CCardHeader>Bank Details</CCardHeader>
+            <CCardBody>
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="bankName" className="col-sm-2 col-form-label">
+                  Bank Name<span className="required-asterisk">*</span>
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="text"
+                    id="bankName"
+                    name="bankName"
+                    placeholder="Enter Bank Name"
+                    value={formData.bankName}
+                    onChange={handleChange}
+                    required
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="bankBranch" className="col-sm-2 col-form-label">
+                  Branch Name<span className="required-asterisk">*</span>
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="text"
+                    id="bankBranch"
+                    name="bankBranch"
+                    placeholder="Enter Branch Name"
+                    value={formData.bankBranch}
+                    onChange={handleChange}
+                    required
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="bankAccountNumber" className="col-sm-2 col-form-label">
+                  Account Number<span className="required-asterisk">*</span>
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="text"
+                    id="bankAccountNumber"
+                    name="bankAccountNumber"
+                    placeholder="Enter Account Number"
+                    value={formData.bankAccountNumber}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="bankIFSCCode" className="col-sm-2 col-form-label">
+                  IFSC Code<span className="required-asterisk">*</span>
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormInput
+                    type="text"
+                    id="bankIFSCCode"
+                    name="bankIFSCCode"
+                    placeholder="Enter IFSC Code"
+                    value={formData.bankIFSCCode}
+                    onChange={handleChange}
+                    required
+                  />
+                </CCol>
+              </CRow>
+            </CCardBody>
+          </CCard>
+
           {/* New Section: Maintenance Settings */}
           <CCard className="mt-4">
             <CCardHeader>Maintenance Settings</CCardHeader>
@@ -519,6 +660,37 @@ const SocietyUpdate = () => {
                   />
                 </CCol>
               </CRow>
+
+              <CRow className="mb-3">
+                <CFormLabel htmlFor="gstApplicable" className="col-sm-2 col-form-label">
+                  Add GST in Bill?
+                </CFormLabel>
+                <CCol sm={10}>
+                  <CFormSelect id="gstApplicable" name="gstApplicable" value={formData.gstApplicable} onChange={handleGstChange}>
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </CFormSelect>
+                </CCol>
+              </CRow>
+
+              {showGstInput && (
+                <CRow className="mb-3">
+                  <CFormLabel htmlFor="gstPercentage" className="col-sm-2 col-form-label">
+                    GST Percentage
+                  </CFormLabel>
+                  <CCol sm={10}>
+                    <CFormInput
+                      type="number"
+                      id="gstPercentage"
+                      name="gstPercentage"
+                      placeholder="Enter GST Percentage"
+                      value={formData.gstPercentage}
+                      onChange={(e) => setFormData({ ...formData, gstPercentage: e.target.value })}
+                      required
+                    />
+                  </CCol>
+                </CRow>
+              )}
               <CButton type="submit" color="primary" disabled={isDisabled}>
                 Submit
               </CButton>

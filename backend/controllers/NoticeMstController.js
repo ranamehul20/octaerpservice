@@ -130,7 +130,7 @@ export const create = async (req, res) => {
       title: populatedNotice.title,
       description: populatedNotice.description,
       societyId: populatedNotice.societyId?.name,
-      category,
+      blockId:populatedNotice.blockId,
       categoryId: populatedNotice.category,
       createdAt: populatedNotice.createdAt,
       updatedAt: populatedNotice.updatedAt,
@@ -271,7 +271,7 @@ export const update = async (req, res) => {
       title: notice.title,
       description: notice.description,
       societyId: notice.societyId?.name,
-      category,
+      blockId:notice.blockId,
       categoryId: notice.category,
       createdAt: notice.createdAt,
       updatedAt: notice.updatedAt,
@@ -290,7 +290,7 @@ export const update = async (req, res) => {
 
 export const list = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, category, startDate, endDate, description, title } = req.query;
+    const { page = 1, limit = 10, category, startDate, endDate, description, title, searchText } = req.query;
 
     // Fetch the current user's details
     const currentUser = await UserDetails.findOne({ userId: req.user._id });
@@ -323,6 +323,13 @@ export const list = async (req, res, next) => {
 
     if (title) {
       filters.title = { $regex: title, $options: "i" }
+    }
+
+    if(searchText){
+      filters["$or"] = [
+        { title: { $regex: req.query.searchText, $options: "i" } },
+        { description: { $regex: req.query.searchText, $options: "i" } },
+      ];
     }
 
     // Add date range filter if provided
@@ -378,6 +385,7 @@ export const list = async (req, res, next) => {
         title: notice.title,
         description: notice.description,
         societyId: notice.societyId.name,
+        blockId:notice.blockId,
         category: categoryName,
         categoryId: notice.category,
         createdAt: notice.createdAt,
