@@ -317,9 +317,11 @@ export const list = async (req, res, next) => {
 
       bills.push({
         _id: item._id,
-        houseNumber: item.houseNumber.name,
-        blockNumber: item.blockNumber.name,
-        userId: item.userId.name,
+        houseNumber: item.houseNumber._id,
+        userId: item.userId._id,
+        houseName:item.houseNumber.name,
+        blockNumber: item.blockNumber._id,
+        blockName:item.blockNumber.name,
         month: item.month, // Month stored as string (e.g., "Mar")
         year: item.year,
         generationDate: item.generationDate,
@@ -389,11 +391,6 @@ export const list = async (req, res, next) => {
   }
 };
 
-
-
-
-
-
 export const getDetails = async (req, res, next) => {
   try {
       const {paymentMethod}=req.query;
@@ -435,8 +432,11 @@ export const getDetails = async (req, res, next) => {
       }
       const bills ={
         _id: maintenanceBill._id,
-        houseNumber: maintenanceBill.houseNumber.name,
-        userId: maintenanceBill.userId.name,
+        houseNumber: maintenanceBill.houseNumber._id,
+        userId: maintenanceBill.userId._id,
+        houseName:maintenanceBill.houseNumber.name,
+        blockNumber: item.blockNumber._id,
+        blockName:item.blockNumber.name,
         month: maintenanceBill.month,
         year: maintenanceBill.year,
         generationDate: maintenanceBill.generationDate,

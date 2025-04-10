@@ -355,7 +355,18 @@ export const list = async (req, res, next) => {
 
     // Handle case when no notices are found
     if (!notices.length) {
-      return res.status(404).json(errors("Notices not found"));
+      res.status(200).json(
+        success(
+          "Notices not found",
+          {
+            totalCount,
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalCount / limit),
+            notices: [],
+          },
+          res.statusCode
+        )
+      );
     }
 
     // Transform the notices for response

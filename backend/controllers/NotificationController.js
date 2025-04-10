@@ -42,7 +42,18 @@ export const list = async (req, res) => {
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
       if (!notifications.length) {
-        return res.status(404).json(errors("Notification not found"));
+        return res.status(200).json(
+          success(
+            "Notification not found",
+            {
+              totalCount,
+              currentPage: parseInt(page),
+              totalPages: Math.ceil(totalCount / limit),
+              notifications: [],
+            },
+            res.statusCode
+          )
+        );
       }
       const notificationList = notifications.map((notification) => {
         return {

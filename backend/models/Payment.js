@@ -9,7 +9,7 @@ const PaymentSchema  = new Schema(
     paymentStatus: { type: String, enum: ["pending", "success", "failed"], default: "pending" },
     paymentMode: { type: String, enum: ["online", "cash"], required: true },
     razorpayOrderId: { type: String, default: null }, // Razorpay Order ID
-    razorpayPaymentId: { type: ObjectId, default: null }, // Razorpay Payment ID
+    razorpayPaymentId: { type: String, default: null }, // Razorpay Payment ID
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields

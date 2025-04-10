@@ -112,10 +112,15 @@ export const confirmPayment = async (req,res,next) => {
             return res.status(400).json({ message: "Invalid payment signature" });
         }
 
+        let totalAmount=maintainanceAmount(maintaince);
+        const razorpayFee = (totalAmount*process.env.RAZORPAY_FEE_PERCENT)/100;
+        const gstOnFee = (razorpayFee*process.env.RAZORPAY_GST_PERCENT)/100;
+        totalAmount= totalAmount+razorpayFee + gstOnFee;
+
         const payment = new Payment({
             maintenanceBillId: maintaince._id, 
             userId:maintaince.userId, 
-            amountPaid: maintaince.totalAmount, 
+            amountPaid: totalAmount, 
             paymentStatus: "success", 
             paymentMode: "online",
             razorpayOrderId:razorpay_order_id,
@@ -129,7 +134,7 @@ export const confirmPayment = async (req,res,next) => {
         await maintaince.save();
         return res.status(200).json({ message: "Payment verified successfully" });
     } catch (error) {
-        console.error("Error verifying payment:", error);
+        console.log("Error verifying payment:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
